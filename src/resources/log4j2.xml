@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <File name="FileLogger" fileName="logs/app.log" append="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
+        </File>
+
+        <SMTP name="MailLogger"
+              subject="CRITICAL ERROR: FlowerShop App"
+              to="hide_email@gmail.com"
+              from="hide_email@gmail.com"
+              smtpHost="smtp.gmail.com"
+              smtpPort="465"
+              smtpUsername="hide_email@gmail.com"
+              smtpPassword="xxxx xxxx xxxx xxxx"
+              smtpProtocol="smtps"
+              smtpDebug="false">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level - %msg%n"/>
+        </SMTP>
+
+        <Console name="ConsoleLogger" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss} %-5level - %msg%n"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="FileLogger"/>
+            <AppenderRef ref="ConsoleLogger"/>
+
+            <AppenderRef ref="MailLogger" level="error"/>
+        </Root>
+    </Loggers>
+</Configuration>
