@@ -159,6 +159,23 @@ class DatabaseManagerTest {
         assertFalse(found);
     }
 
+    @Test
+    void testUpdateBouquetName() {
+        Bouquet bouquet = new Bouquet("Стара Назва");
+        int id = db.insertBouquet(bouquet);
+        assertTrue(id > 0);
+
+        db.updateBouquetName(id, "Нова Назва");
+
+        List<Bouquet> bouquets = db.getAllBouquetsWithContents();
+        Bouquet loaded = bouquets.stream()
+                .filter(b -> b.getId() == id)
+                .findFirst().orElse(null);
+
+        assertNotNull(loaded);
+        assertEquals("Нова Назва", loaded.getName());
+    }
+
     // ==================== ТЕСТИ ЗВ'ЯЗКІВ БУКЕТ-КВІТКА ====================
 
     @Test

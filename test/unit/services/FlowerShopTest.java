@@ -86,6 +86,21 @@ class FlowerShopTest {
         assertEquals(initialSize, shop.getBouquets().size());
     }
 
+    @Test
+    void testRenameBouquet() {
+        Bouquet b = shop.createNewBouquet("До Перейменування");
+        assertNotNull(b);
+        shop.renameBouquet(b, "Після Перейменування");
+        assertEquals("Після Перейменування", b.getName());
+
+        List<Bouquet> bouquets = shop.getBouquets();
+        Bouquet loaded = bouquets.stream()
+                .filter(bq -> bq.getId() == b.getId())
+                .findFirst().orElse(null);
+        assertNotNull(loaded);
+        assertEquals("Після Перейменування", loaded.getName());
+    }
+
     // ==================== КВІТИ В БУКЕТІ ====================
 
     @Test

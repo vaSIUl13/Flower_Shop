@@ -33,6 +33,12 @@ class BouquetTest {
     }
 
     @Test
+    void testSetName() {
+        bouquet.setName("Осінній");
+        assertEquals("Осінній", bouquet.getName());
+    }
+
+    @Test
     void testIdDefaultAndSetter() {
         assertEquals(-1, bouquet.getId());
         bouquet.setId(5);
