@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
     <Appenders>
-        <File name="FileLogger" fileName="logs/app.log" append="true">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
-        </File>
+        <!-- Консольний аппендер — виводить усі рівні від INFO -->
+        <Console name="ConsoleLogger" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
 
+        <!-- Файловий аппендер з ротацією — зберігає логи щоденно -->
+        <RollingFile name="FileLogger"
+                     fileName="logs/flower_shop.log"
+                     filePattern="logs/flower_shop-%d{yyyy-MM-dd}.log.gz"
+                     append="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+        <!-- Email аппендер — надсилає ТІЛЬКИ критичні помилки (FATAL та ERROR) -->
         <SMTP name="MailLogger"
               subject="CRITICAL ERROR: FlowerShop App"
               to="hide_email@gmail.com"
@@ -14,21 +29,40 @@
               smtpUsername="hide_email@gmail.com"
               smtpPassword="xxxx xxxx xxxx xxxx"
               smtpProtocol="smtps"
-              smtpDebug="false">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level - %msg%n"/>
+              smtpDebug="false"
+              bufferSize="512">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}%n%msg%n%throwable%n"/>
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
         </SMTP>
-
-        <Console name="ConsoleLogger" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss} %-5level - %msg%n"/>
-        </Console>
     </Appenders>
 
     <Loggers>
+        <!-- Логер для пакету database — детальне логування -->
+        <Logger name="database" level="debug" additivity="false">
+            <AppenderRef ref="FileLogger"/>
+            <AppenderRef ref="ConsoleLogger"/>
+            <AppenderRef ref="MailLogger"/>
+        </Logger>
+
+        <!-- Логер для пакету services — детальне логування -->
+        <Logger name="services" level="debug" additivity="false">
+            <AppenderRef ref="FileLogger"/>
+            <AppenderRef ref="ConsoleLogger"/>
+            <AppenderRef ref="MailLogger"/>
+        </Logger>
+
+        <!-- Логер для пакету ui — логування дій користувача -->
+        <Logger name="ui" level="info" additivity="false">
+            <AppenderRef ref="FileLogger"/>
+            <AppenderRef ref="ConsoleLogger"/>
+            <AppenderRef ref="MailLogger"/>
+        </Logger>
+
+        <!-- Кореневий логер -->
         <Root level="info">
             <AppenderRef ref="FileLogger"/>
             <AppenderRef ref="ConsoleLogger"/>
-
-            <AppenderRef ref="MailLogger" level="error"/>
+            <AppenderRef ref="MailLogger"/>
         </Root>
     </Loggers>
 </Configuration>

@@ -3,17 +3,20 @@ package ui;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import services.FlowerShop;
 import flowers.*;
 
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -21,12 +24,27 @@ import java.util.function.Consumer;
  * - 6 типів квітів
  * - ColorPicker-стиль вибору кольору
  * - Валідація вводу
+ * - Повноцінна панель фільтрів (як в інтернет-магазині)
  */
 public class CatalogPane extends VBox {
 
+    private static final Logger logger = LogManager.getLogger(CatalogPane.class);
     private final FlowerShop shop;
     private final Consumer<String> statusCallback;
     private TableView<Flower> table;
+
+    private ObservableList<Flower> allFlowers;
+    private FilteredList<Flower> filteredFlowers;
+
+    // Фільтри
+    private TextField nameSearchField;
+    private final Map<String, CheckBox> typeCheckboxes = new LinkedHashMap<>();
+    private TextField priceMinField;
+    private TextField priceMaxField;
+    private TextField stemMinField;
+    private TextField stemMaxField;
+    private final Map<String, CheckBox> colorCheckboxes = new LinkedHashMap<>();
+    private Label resultsCountLabel;
 
     // Предвизначені кольори з hex-кодами
     private static final String[][] COLORS = {
@@ -49,6 +67,10 @@ public class CatalogPane extends VBox {
             "Троянда", "Тюльпан", "Ромашка", "Лілія", "Півонія", "Орхідея"
     };
 
+    private static final String[] FLOWER_TYPE_EMOJIS = {
+            "🌹", "🌷", "🌼", "🌺", "🌸", "🪷"
+    };
+
     public CatalogPane(FlowerShop shop, Consumer<String> statusCallback) {
         this.shop = shop;
         this.statusCallback = statusCallback;
@@ -57,22 +79,340 @@ public class CatalogPane extends VBox {
         setPadding(new Insets(30));
         getStyleClass().add("panel");
 
+        // Заголовок
         Label title = new Label("\uD83C\uDF39  Каталог квітів");
         title.getStyleClass().add("panel-title");
         Label subtitle = new Label("Асортимент із " + shop.getCatalog().size() + " квітів • 6 видів");
         subtitle.getStyleClass().add("panel-subtitle");
+        VBox header = new VBox(4, title, subtitle);
 
+        // Основний контент — фільтри зліва, таблиця справа
+        HBox content = createContent();
+        VBox.setVgrow(content, Priority.ALWAYS);
+
+        getChildren().addAll(header, content);
+        refresh();
+    }
+
+    private HBox createContent() {
+        // Ліва панель — фільтри
+        VBox filterPanel = createFilterPanel();
+        filterPanel.setMinWidth(240);
+        filterPanel.setPrefWidth(260);
+
+        // Права панель — таблиця + кнопки
+        VBox tablePanel = createTablePanel();
+        HBox.setHgrow(tablePanel, Priority.ALWAYS);
+
+        HBox content = new HBox(20, filterPanel, tablePanel);
+        return content;
+    }
+
+    // ==================== ПАНЕЛЬ ФІЛЬТРІВ ====================
+
+    private VBox createFilterPanel() {
+        // Заголовок фільтрів
+        Label filterTitle = new Label("⚙  Фільтри");
+        filterTitle.getStyleClass().add("filter-main-title");
+
+        // Пошук за назвою
+        VBox nameSection = createNameSearchSection();
+
+        // Тип квітки
+        VBox typeSection = createTypeFilterSection();
+
+        // Діапазон цін
+        VBox priceSection = createPriceFilterSection();
+
+        // Діапазон стебла
+        VBox stemSection = createStemFilterSection();
+
+        // Колір
+        VBox colorSection = createColorFilterSection();
+
+        // Кнопка скидання
+        Button resetBtn = new Button("↺  Скинути фільтри");
+        resetBtn.getStyleClass().add("btn-reset");
+        resetBtn.setMaxWidth(Double.MAX_VALUE);
+        resetBtn.setOnAction(e -> resetFilters());
+
+        // Лічильник результатів
+        resultsCountLabel = new Label("Знайдено: 0 з 0 квітів");
+        resultsCountLabel.getStyleClass().add("filter-results-label");
+
+        VBox filterContent = new VBox(16,
+                filterTitle,
+                nameSection,
+                createFilterSeparator(),
+                typeSection,
+                createFilterSeparator(),
+                priceSection,
+                createFilterSeparator(),
+                stemSection,
+                createFilterSeparator(),
+                colorSection,
+                createFilterSeparator(),
+                resetBtn,
+                resultsCountLabel
+        );
+        filterContent.setPadding(new Insets(4));
+
+        ScrollPane scroll = new ScrollPane(filterContent);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scroll.getStyleClass().add("filter-scroll");
+
+        VBox panel = new VBox(scroll);
+        panel.getStyleClass().add("card");
+        VBox.setVgrow(scroll, Priority.ALWAYS);
+        return panel;
+    }
+
+    private Region createFilterSeparator() {
+        Region sep = new Region();
+        sep.getStyleClass().add("filter-separator");
+        sep.setMinHeight(1);
+        sep.setMaxHeight(1);
+        return sep;
+    }
+
+    private VBox createNameSearchSection() {
+        Label title = new Label("Назва");
+        title.getStyleClass().add("filter-section-title");
+
+        nameSearchField = new TextField();
+        nameSearchField.setPromptText("\uD83D\uDD0D  Пошук за назвою...");
+        nameSearchField.getStyleClass().add("search-field");
+        nameSearchField.setMaxWidth(Double.MAX_VALUE);
+        nameSearchField.textProperty().addListener((obs, o, n) -> applyFilters());
+
+        return new VBox(6, title, nameSearchField);
+    }
+
+    private VBox createTypeFilterSection() {
+        Label title = new Label("Тип квітки");
+        title.getStyleClass().add("filter-section-title");
+
+        VBox checkboxes = new VBox(4);
+        for (int i = 0; i < FLOWER_TYPES.length; i++) {
+            CheckBox cb = new CheckBox(FLOWER_TYPE_EMOJIS[i] + "  " + FLOWER_TYPES[i]);
+            cb.setSelected(true);
+            cb.getStyleClass().add("filter-checkbox");
+            cb.selectedProperty().addListener((obs, o, n) -> applyFilters());
+            typeCheckboxes.put(FLOWER_TYPES[i], cb);
+            checkboxes.getChildren().add(cb);
+        }
+
+        // Посилання «Обрати все / Зняти все»
+        Hyperlink selectAll = new Hyperlink("Обрати все");
+        selectAll.getStyleClass().add("filter-link");
+        selectAll.setOnAction(e -> {
+            typeCheckboxes.values().forEach(cb -> cb.setSelected(true));
+        });
+        Hyperlink deselectAll = new Hyperlink("Зняти все");
+        deselectAll.getStyleClass().add("filter-link");
+        deselectAll.setOnAction(e -> {
+            typeCheckboxes.values().forEach(cb -> cb.setSelected(false));
+        });
+        HBox links = new HBox(8, selectAll, deselectAll);
+
+        return new VBox(6, title, checkboxes, links);
+    }
+
+    private VBox createPriceFilterSection() {
+        Label title = new Label("Ціна (грн)");
+        title.getStyleClass().add("filter-section-title");
+
+        priceMinField = new TextField();
+        priceMinField.setPromptText("Від");
+        priceMinField.getStyleClass().add("filter-range-field");
+        priceMinField.textProperty().addListener((obs, o, n) -> {
+            if (!n.isEmpty() && !n.matches("\\d*\\.?\\d*")) priceMinField.setText(o);
+            else applyFilters();
+        });
+
+        priceMaxField = new TextField();
+        priceMaxField.setPromptText("До");
+        priceMaxField.getStyleClass().add("filter-range-field");
+        priceMaxField.textProperty().addListener((obs, o, n) -> {
+            if (!n.isEmpty() && !n.matches("\\d*\\.?\\d*")) priceMaxField.setText(o);
+            else applyFilters();
+        });
+
+        HBox rangeBox = new HBox(8, priceMinField, new Label("—"), priceMaxField);
+        rangeBox.setAlignment(Pos.CENTER_LEFT);
+
+        return new VBox(6, title, rangeBox);
+    }
+
+    private VBox createStemFilterSection() {
+        Label title = new Label("Довжина стебла (см)");
+        title.getStyleClass().add("filter-section-title");
+
+        stemMinField = new TextField();
+        stemMinField.setPromptText("Від");
+        stemMinField.getStyleClass().add("filter-range-field");
+        stemMinField.textProperty().addListener((obs, o, n) -> {
+            if (!n.isEmpty() && !n.matches("\\d*\\.?\\d*")) stemMinField.setText(o);
+            else applyFilters();
+        });
+
+        stemMaxField = new TextField();
+        stemMaxField.setPromptText("До");
+        stemMaxField.getStyleClass().add("filter-range-field");
+        stemMaxField.textProperty().addListener((obs, o, n) -> {
+            if (!n.isEmpty() && !n.matches("\\d*\\.?\\d*")) stemMaxField.setText(o);
+            else applyFilters();
+        });
+
+        HBox rangeBox = new HBox(8, stemMinField, new Label("—"), stemMaxField);
+        rangeBox.setAlignment(Pos.CENTER_LEFT);
+
+        return new VBox(6, title, rangeBox);
+    }
+
+    private VBox createColorFilterSection() {
+        Label title = new Label("Колір");
+        title.getStyleClass().add("filter-section-title");
+
+        FlowPane colorFlow = new FlowPane(6, 6);
+        colorFlow.setPrefWrapLength(220);
+
+        for (String[] c : COLORS) {
+            CheckBox cb = new CheckBox(c[0]);
+            cb.setSelected(true);
+            cb.getStyleClass().add("filter-checkbox");
+
+            // Кольоровий маркер
+            Rectangle rect = new Rectangle(10, 10);
+            rect.setArcWidth(3);
+            rect.setArcHeight(3);
+            rect.setFill(Color.web(c[1]));
+            rect.setStroke(Color.web("#ccc"));
+            cb.setGraphic(rect);
+
+            cb.selectedProperty().addListener((obs, o, n) -> applyFilters());
+            colorCheckboxes.put(c[0], cb);
+            colorFlow.getChildren().add(cb);
+        }
+
+        // Посилання
+        Hyperlink selectAll = new Hyperlink("Обрати все");
+        selectAll.getStyleClass().add("filter-link");
+        selectAll.setOnAction(e -> {
+            colorCheckboxes.values().forEach(cb -> cb.setSelected(true));
+        });
+        Hyperlink deselectAll = new Hyperlink("Зняти все");
+        deselectAll.getStyleClass().add("filter-link");
+        deselectAll.setOnAction(e -> {
+            colorCheckboxes.values().forEach(cb -> cb.setSelected(false));
+        });
+        HBox links = new HBox(8, selectAll, deselectAll);
+
+        return new VBox(6, title, colorFlow, links);
+    }
+
+    // ==================== ЛОГІКА ФІЛЬТРАЦІЇ ====================
+
+    private void applyFilters() {
+        if (filteredFlowers == null) return;
+
+        String nameFilter = nameSearchField.getText() == null ? "" : nameSearchField.getText().trim().toLowerCase();
+
+        Set<String> selectedTypes = new HashSet<>();
+        for (Map.Entry<String, CheckBox> entry : typeCheckboxes.entrySet()) {
+            if (entry.getValue().isSelected()) selectedTypes.add(entry.getKey());
+        }
+
+        Double priceMin = parseOptionalDouble(priceMinField.getText());
+        Double priceMax = parseOptionalDouble(priceMaxField.getText());
+        Double stemMin = parseOptionalDouble(stemMinField.getText());
+        Double stemMax = parseOptionalDouble(stemMaxField.getText());
+
+        Set<String> selectedColors = new HashSet<>();
+        for (Map.Entry<String, CheckBox> entry : colorCheckboxes.entrySet()) {
+            if (entry.getValue().isSelected()) selectedColors.add(entry.getKey());
+        }
+
+        filteredFlowers.setPredicate(flower -> {
+            // Фільтр за назвою
+            if (!nameFilter.isEmpty() && !flower.getName().toLowerCase().contains(nameFilter)) {
+                return false;
+            }
+            // Фільтр за типом
+            if (!selectedTypes.contains(flower.getTypeName())) {
+                return false;
+            }
+            // Фільтр за ціною
+            if (priceMin != null && flower.getPrice() < priceMin) return false;
+            if (priceMax != null && flower.getPrice() > priceMax) return false;
+            // Фільтр за стеблом
+            if (stemMin != null && flower.getStemLength() < stemMin) return false;
+            if (stemMax != null && flower.getStemLength() > stemMax) return false;
+            // Фільтр за кольором
+            if (!selectedColors.contains(flower.getColor())) {
+                return false;
+            }
+            return true;
+        });
+
+        updateResultsCount();
+        logger.debug("Фільтри застосовано: знайдено " + filteredFlowers.size() + " з " + allFlowers.size());
+    }
+
+    private void resetFilters() {
+        nameSearchField.clear();
+        typeCheckboxes.values().forEach(cb -> cb.setSelected(true));
+        priceMinField.clear();
+        priceMaxField.clear();
+        stemMinField.clear();
+        stemMaxField.clear();
+        colorCheckboxes.values().forEach(cb -> cb.setSelected(true));
+        applyFilters();
+        logger.info("Фільтри скинуто.");
+        statusCallback.accept("↺ Фільтри скинуто — показано всі квіти каталогу");
+    }
+
+    private void updateResultsCount() {
+        int total = allFlowers != null ? allFlowers.size() : 0;
+        int shown = filteredFlowers != null ? filteredFlowers.size() : 0;
+        resultsCountLabel.setText(String.format("Знайдено: %d з %d квітів", shown, total));
+        if (shown == total) {
+            resultsCountLabel.setStyle("-fx-text-fill: #6B9A9A;");
+        } else if (shown == 0) {
+            resultsCountLabel.setStyle("-fx-text-fill: #E05555;");
+        } else {
+            resultsCountLabel.setStyle("-fx-text-fill: #2AA5A5;");
+        }
+    }
+
+    private Double parseOptionalDouble(String text) {
+        if (text == null || text.trim().isEmpty()) return null;
+        try {
+            return Double.parseDouble(text.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    // ==================== ТАБЛИЦЯ + КНОПКИ ====================
+
+    private VBox createTablePanel() {
         table = createTable();
         VBox.setVgrow(table, Priority.ALWAYS);
 
         HBox buttons = createButtons();
-        getChildren().addAll(new VBox(4, title, subtitle), table, buttons);
-        refresh();
+
+        VBox panel = new VBox(12, table, buttons);
+        panel.getStyleClass().add("card");
+        VBox.setVgrow(table, Priority.ALWAYS);
+        return panel;
     }
 
     private TableView<Flower> createTable() {
         TableView<Flower> tv = new TableView<>();
-        tv.setPlaceholder(new Label("Каталог порожній — натисніть «Додати квітку»"));
+        tv.setPlaceholder(new Label("Немає квітів, що відповідають фільтрам"));
 
         TableColumn<Flower, String> nameCol = col("Назва", 170, f -> f.getName());
         TableColumn<Flower, String> typeCol = col("Тип", 90, Flower::getTypeName);
@@ -136,6 +476,7 @@ public class CatalogPane extends VBox {
     // ==================== ДІАЛОГ ДОДАВАННЯ КВІТКИ ====================
 
     private void showAddFlowerDialog() {
+        logger.info("Користувач відкрив діалог додавання нової квітки.");
         Dialog<Flower> dialog = new Dialog<>();
         dialog.setTitle("Нова квітка");
         dialog.setHeaderText("Створення нової квітки для каталогу");
@@ -216,6 +557,7 @@ public class CatalogPane extends VBox {
                     String color = colorBox.getValue();
                     return buildFlower(typeBox.getValue(), name, price, stem, color, specificFields);
                 } catch (Exception ex) {
+                    logger.error("Помилка при створенні квітки з даних форми.", ex);
                     showWarning("Помилка у введених даних: " + ex.getMessage());
                 }
             }
@@ -226,6 +568,7 @@ public class CatalogPane extends VBox {
         result.ifPresent(flower -> {
             shop.addFlower(flower);
             refresh();
+            logger.info("Квітку \"" + flower.getName() + "\" (" + flower.getTypeName() + ") додано через UI.");
             statusCallback.accept("✅ Квітку \"" + flower.getName() + "\" (" + flower.getTypeName() + ") додано");
         });
     }
@@ -350,6 +693,7 @@ public class CatalogPane extends VBox {
         if (idx >= 0) {
             shop.removeFlower(idx);
             refresh();
+            logger.info("Квітку \"" + sel.getName() + "\" видалено через UI.");
             statusCallback.accept("\uD83D\uDDD1 Квітку \"" + sel.getName() + "\" видалено");
         }
     }
@@ -415,7 +759,9 @@ public class CatalogPane extends VBox {
     }
 
     public void refresh() {
-        table.setItems(FXCollections.observableArrayList(shop.getCatalog()));
-        table.refresh();
+        allFlowers = FXCollections.observableArrayList(shop.getCatalog());
+        filteredFlowers = new FilteredList<>(allFlowers, f -> true);
+        table.setItems(filteredFlowers);
+        applyFilters();
     }
 }

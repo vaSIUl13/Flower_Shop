@@ -1,0 +1,13 @@
+C:\Users\Адмін\IdeaProjects\Flower_Shop\test\database\DatabaseManagerTest.java
+C:\Users\Адмін\IdeaProjects\Flower_Shop\test\flowers\AccessoryTest.java
+C:\Users\Адмін\IdeaProjects\Flower_Shop\test\flowers\BouquetTest.java
+C:\Users\Адмін\IdeaProjects\Flower_Shop\test\flowers\ChamomileTest.java
+C:\Users\Адмін\IdeaProjects\Flower_Shop\test\flowers\FlowerTest.java
+C:\Users\Адмін\IdeaProjects\Flower_Shop\test\flowers\LilyTest.java
+C:\Users\Адмін\IdeaProjects\Flower_Shop\test\flowers\OrchidTest.java
+C:\Users\Адмін\IdeaProjects\Flower_Shop\test\flowers\PeonyTest.java
+C:\Users\Адмін\IdeaProjects\Flower_Shop\test\flowers\RoseTest.java
+C:\Users\Адмін\IdeaProjects\Flower_Shop\test\flowers\TulipTest.java
+C:\Users\Адмін\IdeaProjects\Flower_Shop\test\menu\CommandTest.java
+C:\Users\Адмін\IdeaProjects\Flower_Shop\test\services\FlowerShopTest.java
+C:\Users\Адмін\IdeaProjects\Flower_Shop\test\ui\FlowerShopAppTest.java

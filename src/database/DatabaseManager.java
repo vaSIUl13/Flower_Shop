@@ -9,20 +9,19 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Менеджер бази даних SQLite для збереження квітів, букетів та аксесуарів.
- */
 public class DatabaseManager {
 
     private static final Logger logger = LogManager.getLogger(DatabaseManager.class);
-    private static final String DB_URL = "jdbc:sqlite:flower_shop.db";
+    protected String getDbUrl() {
+        return "jdbc:sqlite:flower_shop.db";
+    }
 
     public DatabaseManager() {
         initDatabase();
     }
 
-    private Connection getConnection() throws SQLException {
-        Connection conn = DriverManager.getConnection(DB_URL);
+    protected Connection getConnection() throws SQLException {
+        Connection conn = DriverManager.getConnection(getDbUrl());
         try (Statement stmt = conn.createStatement()) {
             stmt.execute("PRAGMA foreign_keys = ON");
         }
@@ -72,7 +71,6 @@ public class DatabaseManager {
                     + "color TEXT DEFAULT '', "
                     + "FOREIGN KEY (bouquet_id) REFERENCES bouquets(id) ON DELETE CASCADE)");
 
-            // Міграція — додати нові колонки, якщо їх ще немає
             addColumnIfMissing(stmt, "flowers", "fragrance", "TEXT");
             addColumnIfMissing(stmt, "flowers", "bloom_stage", "TEXT");
             addColumnIfMissing(stmt, "flowers", "is_fragrant", "INTEGER");
@@ -82,7 +80,7 @@ public class DatabaseManager {
 
             logger.info("База даних ініціалізована.");
         } catch (SQLException e) {
-            logger.error("Помилка ініціалізації БД!", e);
+            logger.fatal("КРИТИЧНА ПОМИЛКА: не вдалося ініціалізувати базу даних!", e);
         }
     }
 
@@ -90,12 +88,11 @@ public class DatabaseManager {
         try {
             stmt.execute("ALTER TABLE " + table + " ADD COLUMN " + column + " " + type);
         } catch (SQLException ignored) {
-            // Колонка вже існує
+
         }
     }
 
     // ==================== КВІТИ ====================
-
     public int insertFlower(Flower flower) {
         String sql = "INSERT INTO flowers (type, name, price, stem_length, color, freshness_date, "
                 + "has_thorns, bud_shape, petal_shape, is_double, core_size, petal_count, "
@@ -121,7 +118,6 @@ public class DatabaseManager {
             ps.setString(5, flower.getColor());
             ps.setString(6, flower.getFreshnessDate().toString());
 
-            // Всі спеціалізовані поля — за замовчуванням NULL
             for (int i = 7; i <= 17; i++) ps.setNull(i, Types.VARCHAR);
 
             if (flower instanceof Rose r) {
@@ -153,7 +149,7 @@ public class DatabaseManager {
                 }
             }
         } catch (SQLException e) {
-            logger.error("Помилка вставки квітки в БД!", e);
+            logger.error("Помилка вставки квітки '" + flower.getName() + "' в БД!", e);
         }
         return -1;
     }
@@ -178,13 +174,13 @@ public class DatabaseManager {
              PreparedStatement ps = conn.prepareStatement("DELETE FROM flowers WHERE id = ?")) {
             ps.setInt(1, id);
             ps.executeUpdate();
+            logger.debug("Квітку з id=" + id + " видалено з БД.");
         } catch (SQLException e) {
-            logger.error("Помилка видалення квітки з БД!", e);
+            logger.error("Помилка видалення квітки id=" + id + " з БД!", e);
         }
     }
 
     // ==================== БУКЕТИ ====================
-
     public int insertBouquet(Bouquet bouquet) {
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement("INSERT INTO bouquets (name) VALUES (?)", Statement.RETURN_GENERATED_KEYS)) {
@@ -208,8 +204,21 @@ public class DatabaseManager {
              PreparedStatement ps = conn.prepareStatement("DELETE FROM bouquets WHERE id = ?")) {
             ps.setInt(1, id);
             ps.executeUpdate();
+            logger.debug("Букет з id=" + id + " видалено з БД.");
         } catch (SQLException e) {
-            logger.error("Помилка видалення букету!", e);
+            logger.error("Помилка видалення букету id=" + id + "!", e);
+        }
+    }
+
+    public void updateBouquetName(int bouquetId, String newName) {
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement("UPDATE bouquets SET name = ? WHERE id = ?")) {
+            ps.setString(1, newName);
+            ps.setInt(2, bouquetId);
+            ps.executeUpdate();
+            logger.debug("Букет id=" + bouquetId + " перейменовано на '" + newName + "' в БД.");
+        } catch (SQLException e) {
+            logger.error("Помилка перейменування букету id=" + bouquetId + "!", e);
         }
     }
 
@@ -260,15 +269,15 @@ public class DatabaseManager {
     }
 
     // ==================== ЗВ'ЯЗОК БУКЕТ-КВІТКА ====================
-
     public void addFlowerToBouquet(int bouquetId, int flowerId) {
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement("INSERT INTO bouquet_flowers (bouquet_id, flower_id) VALUES (?, ?)")) {
             ps.setInt(1, bouquetId);
             ps.setInt(2, flowerId);
             ps.executeUpdate();
+            logger.debug("Зв'язок квітка id=" + flowerId + " → букет id=" + bouquetId + " додано в БД.");
         } catch (SQLException e) {
-            logger.error("Помилка додавання квітки до букету!", e);
+            logger.error("Помилка додавання квітки id=" + flowerId + " до букету id=" + bouquetId + "!", e);
         }
     }
 
@@ -279,13 +288,13 @@ public class DatabaseManager {
             ps.setInt(1, bouquetId);
             ps.setInt(2, flowerId);
             ps.executeUpdate();
+            logger.debug("Зв'язок квітка id=" + flowerId + " → букет id=" + bouquetId + " видалено з БД.");
         } catch (SQLException e) {
-            logger.error("Помилка видалення квітки з букету!", e);
+            logger.error("Помилка видалення квітки id=" + flowerId + " з букету id=" + bouquetId + "!", e);
         }
     }
 
     // ==================== АКСЕСУАРИ ====================
-
     public int insertAccessory(int bouquetId, Accessory accessory) {
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement("INSERT INTO accessories (bouquet_id, name, price, color) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
@@ -312,13 +321,13 @@ public class DatabaseManager {
              PreparedStatement ps = conn.prepareStatement("DELETE FROM accessories WHERE id = ?")) {
             ps.setInt(1, id);
             ps.executeUpdate();
+            logger.debug("Аксесуар id=" + id + " видалено з БД.");
         } catch (SQLException e) {
-            logger.error("Помилка видалення аксесуару!", e);
+            logger.error("Помилка видалення аксесуару id=" + id + "!", e);
         }
     }
 
     // ==================== Допоміжні ====================
-
     private Flower buildFlowerFromResultSet(ResultSet rs) throws SQLException {
         String type = rs.getString("type");
         String name = rs.getString("name");

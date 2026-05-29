@@ -6,6 +6,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import services.FlowerShop;
 import flowers.*;
 
@@ -17,6 +19,7 @@ import java.util.function.Consumer;
  */
 public class SearchPane extends VBox {
 
+    private static final Logger logger = LogManager.getLogger(SearchPane.class);
     private final FlowerShop shop;
     private final Consumer<String> statusCallback;
 
@@ -138,6 +141,7 @@ public class SearchPane extends VBox {
             min = Double.parseDouble(minField.getText().trim());
             max = Double.parseDouble(maxField.getText().trim());
         } catch (NumberFormatException e) {
+            logger.warn("Некоректні числові значення для пошуку: min='" + minField.getText() + "', max='" + maxField.getText() + "'");
             showWarning("Введіть коректні числові значення для діапазону!");
             return;
         }
@@ -152,6 +156,8 @@ public class SearchPane extends VBox {
 
         resultsTable.setItems(FXCollections.observableArrayList(found));
         resultLabel.setText(String.format("Знайдено %d квіт(ів) у букеті \"%s\" зі стеблом від %.1f до %.1f см:",
+                found.size(), b.getName(), min, max));
+        logger.info(String.format("Пошук: знайдено %d квіт(ів) у букеті '%s' (стебло: %.1f–%.1f см).",
                 found.size(), b.getName(), min, max));
         statusCallback.accept(String.format("🔍 Знайдено %d квіт(ів)", found.size()));
     }

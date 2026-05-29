@@ -207,6 +207,13 @@ public class FlowerShop {
         }
     }
 
+    public void renameBouquet(Bouquet bouquet, String newName) {
+        String oldName = bouquet.getName();
+        bouquet.setName(newName);
+        db.updateBouquetName(bouquet.getId(), newName);
+        logger.info("Перейменовано букет: \"" + oldName + "\" → \"" + newName + "\"");
+    }
+
     public void addFlowerToBouquet(Bouquet bouquet, Flower flower) {
         db.addFlowerToBouquet(bouquet.getId(), flower.getId());
         bouquet.addFlower(flower);

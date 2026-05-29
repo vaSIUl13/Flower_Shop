@@ -4,8 +4,6 @@
     -fx-background-color: #F4FAFA;
 }
 
-
-
 .sidebar {
     -fx-background-color: linear-gradient(to bottom, #3DC8C8, #2AA5A5);
     -fx-padding: 0;
@@ -60,7 +58,6 @@
 }
 
 
-
 .content-area {
     -fx-background-color: #F4FAFA;
     -fx-padding: 0;
@@ -84,7 +81,6 @@
 }
 
 
-
 .card {
     -fx-background-color: white;
     -fx-background-radius: 12;
@@ -99,7 +95,6 @@
     -fx-text-fill: #2C3E50;
     -fx-padding: 0 0 8 0;
 }
-
 
 
 .table-view {
@@ -153,7 +148,6 @@
     -fx-text-fill: #AAC0C0;
     -fx-font-size: 14px;
 }
-
 
 
 .btn-primary {
@@ -227,7 +221,6 @@
 }
 
 
-
 .text-field, .text-area {
     -fx-background-color: #F8FCFC;
     -fx-border-color: #D4E8E8;
@@ -245,8 +238,128 @@
     -fx-effect: dropshadow(gaussian, rgba(46,196,196,0.2), 6, 0, 0, 0);
 }
 
+.search-field {
+    -fx-background-color: #EEF7F7;
+    -fx-border-color: #C8E6E6;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-padding: 8 14;
+    -fx-font-size: 13px;
+    -fx-text-fill: #2C3E50;
+    -fx-prompt-text-fill: #8FBFBF;
+}
 
+.search-field:focused {
+    -fx-border-color: #2EC4C4;
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(46,196,196,0.25), 8, 0, 0, 0);
+}
 
+/* ================ ФІЛЬТРИ КАТАЛОГУ ================ */
+
+.filter-main-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2C3E50;
+    -fx-padding: 0 0 4 0;
+}
+
+.filter-section-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3A5A5A;
+    -fx-padding: 2 0 0 0;
+}
+
+.filter-separator {
+    -fx-background-color: #E8F0F0;
+    -fx-pref-height: 1;
+    -fx-max-height: 1;
+}
+
+.filter-range-field {
+    -fx-background-color: #F8FCFC;
+    -fx-border-color: #D4E8E8;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 6 8;
+    -fx-font-size: 12px;
+    -fx-pref-width: 80;
+    -fx-max-width: 80;
+}
+
+.filter-range-field:focused {
+    -fx-border-color: #2EC4C4;
+    -fx-background-color: white;
+}
+
+.filter-checkbox {
+    -fx-font-size: 12px;
+    -fx-text-fill: #3A4F5F;
+    -fx-cursor: hand;
+}
+
+.filter-checkbox .box {
+    -fx-background-color: #F0F6F6;
+    -fx-border-color: #C8DEDE;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 2;
+}
+
+.filter-checkbox:selected .box {
+    -fx-background-color: #2EC4C4;
+    -fx-border-color: #2EC4C4;
+}
+
+.filter-checkbox:selected .mark {
+    -fx-background-color: white;
+}
+
+.filter-link {
+    -fx-font-size: 11px;
+    -fx-text-fill: #2AA5A5;
+    -fx-padding: 0;
+    -fx-border-color: transparent;
+}
+
+.filter-link:hover {
+    -fx-text-fill: #1F8888;
+}
+
+.btn-reset {
+    -fx-background-color: #F0E8E8;
+    -fx-text-fill: #8A5555;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 16;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #E0D0D0;
+    -fx-cursor: hand;
+}
+
+.btn-reset:hover {
+    -fx-background-color: #E8DADA;
+    -fx-text-fill: #6A3A3A;
+}
+
+.filter-results-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6B9A9A;
+    -fx-padding: 4 0 0 0;
+}
+
+.filter-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+
+.filter-scroll > .viewport {
+    -fx-background-color: transparent;
+}
 .combo-box {
     -fx-background-color: #F8FCFC;
     -fx-border-color: #D4E8E8;

@@ -3,12 +3,15 @@ package ui;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import services.FlowerShop;
 import flowers.*;
 
@@ -21,11 +24,14 @@ import java.util.function.Consumer;
  */
 public class BouquetPane extends VBox {
 
+    private static final Logger logger = LogManager.getLogger(BouquetPane.class);
     private final FlowerShop shop;
     private final Consumer<String> statusCallback;
 
     private ListView<String> bouquetList;
     private ObservableList<String> bouquetNames;
+    private FilteredList<String> filteredBouquetNames;
+    private TextField searchField;
 
     private TableView<Flower> flowersTable;
     private TableView<Accessory> accessoriesTable;
@@ -105,14 +111,40 @@ public class BouquetPane extends VBox {
         Label listTitle = new Label("Список букетів");
         listTitle.getStyleClass().add("section-title");
 
+        // Поле пошуку букетів
+        searchField = new TextField();
+        searchField.setPromptText("\uD83D\uDD0D  Пошук букету...");
+        searchField.getStyleClass().add("search-field");
+        searchField.setMaxWidth(Double.MAX_VALUE);
+
         bouquetList = new ListView<>();
         bouquetNames = FXCollections.observableArrayList();
-        bouquetList.setItems(bouquetNames);
+        filteredBouquetNames = new FilteredList<>(bouquetNames, s -> true);
+        bouquetList.setItems(filteredBouquetNames);
         bouquetList.setPlaceholder(new Label("Ще немає букетів"));
         VBox.setVgrow(bouquetList, Priority.ALWAYS);
 
-        bouquetList.getSelectionModel().selectedIndexProperty().addListener((obs, oldVal, newVal) -> {
-            showBouquetDetails(newVal.intValue());
+        // Фільтрація при введенні тексту
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> {
+            String filter = newVal == null ? "" : newVal.trim().toLowerCase();
+            if (filter.isEmpty()) {
+                filteredBouquetNames.setPredicate(s -> true);
+                bouquetList.setPlaceholder(new Label("Ще немає букетів"));
+            } else {
+                filteredBouquetNames.setPredicate(s -> s.toLowerCase().contains(filter));
+                bouquetList.setPlaceholder(new Label("Нічого не знайдено"));
+            }
+            logger.debug("Фільтр букетів: '" + newVal + "', знайдено: " + filteredBouquetNames.size());
+        });
+
+        bouquetList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                // Знаходимо реальний індекс у повному списку
+                int realIndex = bouquetNames.indexOf(newVal);
+                showBouquetDetails(realIndex);
+            } else {
+                showBouquetDetails(-1);
+            }
         });
 
         Button createBtn = new Button("＋  Створити букет");
@@ -120,12 +152,17 @@ public class BouquetPane extends VBox {
         createBtn.setMaxWidth(Double.MAX_VALUE);
         createBtn.setOnAction(e -> createBouquet());
 
-        Button deleteBtn = new Button("🗑  Видалити букет");
+        Button renameBtn = new Button("✏  Перейменувати");
+        renameBtn.getStyleClass().add("btn-secondary");
+        renameBtn.setMaxWidth(Double.MAX_VALUE);
+        renameBtn.setOnAction(e -> renameBouquet());
+
+        Button deleteBtn = new Button("\uD83D\uDDD1  Видалити букет");
         deleteBtn.getStyleClass().addAll("btn-danger", "btn-small");
         deleteBtn.setMaxWidth(Double.MAX_VALUE);
         deleteBtn.setOnAction(e -> deleteBouquet());
 
-        VBox panel = new VBox(10, listTitle, bouquetList, createBtn, deleteBtn);
+        VBox panel = new VBox(10, listTitle, searchField, bouquetList, createBtn, renameBtn, deleteBtn);
         panel.getStyleClass().add("card");
         return panel;
     }
@@ -239,9 +276,12 @@ public class BouquetPane extends VBox {
     }
 
     private Bouquet getSelectedBouquet() {
-        int idx = bouquetList.getSelectionModel().getSelectedIndex();
-        if (idx >= 0 && idx < shop.getBouquets().size()) {
-            return shop.getBouquets().get(idx);
+        String selectedName = bouquetList.getSelectionModel().getSelectedItem();
+        if (selectedName != null) {
+            int realIdx = bouquetNames.indexOf(selectedName);
+            if (realIdx >= 0 && realIdx < shop.getBouquets().size()) {
+                return shop.getBouquets().get(realIdx);
+            }
         }
         return null;
     }
@@ -272,21 +312,46 @@ public class BouquetPane extends VBox {
                 shop.createNewBouquet(name.trim());
                 refresh();
                 bouquetList.getSelectionModel().selectLast();
+                logger.info("Створено новий букет: \"" + name.trim() + "\" через UI.");
                 statusCallback.accept("✅ Букет \"" + name.trim() + "\" створено");
             }
         });
     }
 
+    private void renameBouquet() {
+        Bouquet b = getSelectedBouquet();
+        if (b == null) { showWarning("Спочатку оберіть букет для перейменування"); return; }
+
+        TextInputDialog dialog = new TextInputDialog(b.getName());
+        dialog.setTitle("Перейменувати букет");
+        dialog.setHeaderText("Редагування назви букету");
+        dialog.setContentText("Нова назва:");
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(newName -> {
+            if (!newName.trim().isEmpty() && !newName.trim().equals(b.getName())) {
+                String oldName = b.getName();
+                shop.renameBouquet(b, newName.trim());
+                refresh();
+                // Вибрати перейменований букет у списку
+                bouquetList.getSelectionModel().select(newName.trim());
+                logger.info("Перейменовано букет: \"" + oldName + "\" → \"" + newName.trim() + "\" через UI.");
+                statusCallback.accept("✏ Букет перейменовано: \"" + oldName + "\" → \"" + newName.trim() + "\"");
+            }
+        });
+    }
+
     private void deleteBouquet() {
-        int idx = bouquetList.getSelectionModel().getSelectedIndex();
-        if (idx < 0) {
+        String selectedName = bouquetList.getSelectionModel().getSelectedItem();
+        if (selectedName == null) {
             showWarning("Оберіть букет для видалення");
             return;
         }
-        String name = shop.getBouquets().get(idx).getName();
-        shop.removeBouquet(idx);
+        int realIdx = bouquetNames.indexOf(selectedName);
+        if (realIdx < 0) return;
+        shop.removeBouquet(realIdx);
         refresh();
-        statusCallback.accept("🗑 Букет \"" + name + "\" видалено");
+        logger.info("Видалено букет: \"" + selectedName + "\" через UI.");
+        statusCallback.accept("\uD83D\uDDD1 Букет \"" + selectedName + "\" видалено");
     }
 
     private void addFlowerToBouquet() {
@@ -316,8 +381,10 @@ public class BouquetPane extends VBox {
                         shop.addFlowerToBouquet(b, flower);
                     }
                     refreshDetails();
+                    logger.info("Додано " + qty + " шт. \"" + flower.getName() + "\" до букету \"" + b.getName() + "\".");
                     statusCallback.accept("✅ Додано " + qty + " шт. \"" + flower.getName() + "\" до букету");
                 } catch (NumberFormatException ex) {
+                    logger.warn("Невірний формат кількості при додаванні квітки до букету: '" + qtyStr + "'");
                     showWarning("Невірне число!");
                 }
             });
@@ -334,6 +401,7 @@ public class BouquetPane extends VBox {
         int idx = b.getFlowers().indexOf(selected);
         shop.removeFlowerFromBouquet(b, idx);
         refreshDetails();
+        logger.info("Видалено квітку \"" + selected.getName() + "\" з букету \"" + b.getName() + "\".");
         statusCallback.accept("🗑 Квітку видалено з букету");
     }
 
@@ -407,6 +475,7 @@ public class BouquetPane extends VBox {
         result.ifPresent(acc -> {
             shop.addAccessoryToBouquet(b, acc);
             refreshDetails();
+            logger.info("Додано аксесуар \"" + acc.getName() + "\" (" + acc.getColor() + ") до букету \"" + b.getName() + "\".");
             statusCallback.accept("✅ " + acc.getName() + " (" + acc.getColor() + ") додано до букету");
         });
     }
@@ -421,6 +490,7 @@ public class BouquetPane extends VBox {
         int idx = b.getAccessories().indexOf(selected);
         shop.removeAccessoryFromBouquet(b, idx);
         refreshDetails();
+        logger.info("Видалено аксесуар \"" + selected.getName() + "\" з букету \"" + b.getName() + "\".");
         statusCallback.accept("🗑 Аксесуар видалено");
     }
 
@@ -429,6 +499,7 @@ public class BouquetPane extends VBox {
         if (b == null) { showWarning("Спочатку оберіть букет"); return; }
         b.sortFlowersByFreshness();
         refreshDetails();
+        logger.info("Квіти у букеті \"" + b.getName() + "\" відсортовано за свіжістю.");
         statusCallback.accept("⇅ Квіти у букеті \"" + b.getName() + "\" відсортовано за свіжістю");
     }
 
@@ -440,8 +511,13 @@ public class BouquetPane extends VBox {
     }
 
     private void refreshDetails() {
-        int idx = bouquetList.getSelectionModel().getSelectedIndex();
-        showBouquetDetails(idx);
+        String selectedName = bouquetList.getSelectionModel().getSelectedItem();
+        if (selectedName != null) {
+            int realIdx = bouquetNames.indexOf(selectedName);
+            showBouquetDetails(realIdx);
+        } else {
+            showBouquetDetails(-1);
+        }
     }
 
     public void refresh() {
@@ -449,8 +525,21 @@ public class BouquetPane extends VBox {
         for (Bouquet b : shop.getBouquets()) {
             bouquetNames.add(b.getName());
         }
-        int idx = bouquetList.getSelectionModel().getSelectedIndex();
-        showBouquetDetails(idx);
+        // Зберігаємо фільтр після оновлення
+        String filter = searchField.getText();
+        if (filter != null && !filter.trim().isEmpty()) {
+            String f = filter.trim().toLowerCase();
+            filteredBouquetNames.setPredicate(s -> s.toLowerCase().contains(f));
+        } else {
+            filteredBouquetNames.setPredicate(s -> true);
+        }
+        String selectedName = bouquetList.getSelectionModel().getSelectedItem();
+        if (selectedName != null) {
+            int realIdx = bouquetNames.indexOf(selectedName);
+            showBouquetDetails(realIdx);
+        } else {
+            showBouquetDetails(-1);
+        }
     }
 
     // ==================== Допоміжні методи кольорів ====================

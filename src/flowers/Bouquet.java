@@ -21,6 +21,7 @@ public class Bouquet implements Serializable {
     public void addFlower(Flower flower) { flowers.add(flower); }
     public void addAccessory(Accessory acc) { accessories.add(acc); }
     public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
     public List<Flower> getFlowers() { return flowers; }
     public List<Accessory> getAccessories() { return accessories; }
 
