@@ -1,9 +1,6 @@
 package flowers;
 import java.time.LocalDate;
 
-/**
- * Лілія — ароматна квітка з великими пелюстками.
- */
 public class Lily extends Flower {
     private String fragrance;
     private int petalCount;

@@ -255,8 +255,6 @@
     -fx-effect: dropshadow(gaussian, rgba(46,196,196,0.25), 8, 0, 0, 0);
 }
 
-/* ================ ФІЛЬТРИ КАТАЛОГУ ================ */
-
 .filter-main-title {
     -fx-font-size: 16px;
     -fx-font-weight: bold;

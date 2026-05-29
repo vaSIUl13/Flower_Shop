@@ -10,10 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-/**
- * Сервіс квіткового магазину.
- * Зберігає каталог квітів та букети у базі даних SQLite.
- */
 public class FlowerShop {
     private static final Logger logger = LogManager.getLogger(FlowerShop.class);
 
@@ -36,42 +32,39 @@ public class FlowerShop {
         logger.info("Завантажено з БД: квітів=" + catalog.size() + ", букетів=" + bouquets.size());
     }
 
-    /**
-     * Ініціалізує багатий каталог з 22 квітками різних типів.
-     */
     private void initRichCatalog() {
         LocalDate today = LocalDate.now();
 
-        // === ТРОЯНДИ ===
+
         addFlowerSilent(new Rose("Троянда Гран-Прі", 80, 60, "Червоний", today, true, "Келих"));
         addFlowerSilent(new Rose("Троянда Фрідом", 95, 65, "Бордовий", today, true, "Класичний"));
         addFlowerSilent(new Rose("Троянда Аваланч", 90, 55, "Білий", today.minusDays(1), false, "Півонієвидний"));
         addFlowerSilent(new Rose("Троянда Мондіаль", 85, 50, "Кремовий", today, false, "Келих"));
         addFlowerSilent(new Rose("Троянда Пінк Флойд", 88, 55, "Рожевий", today, true, "Бокаловидний"));
 
-        // === ТЮЛЬПАНИ ===
+
         addFlowerSilent(new Tulip("Тюльпан Голд Парад", 40, 35, "Жовтий", today, "Овальна", false));
         addFlowerSilent(new Tulip("Тюльпан Ред Імпрешн", 45, 40, "Червоний", today, "Витягнута", false));
         addFlowerSilent(new Tulip("Тюльпан Перпл Прінс", 50, 38, "Фіолетовий", today.minusDays(1), "Округла", true));
         addFlowerSilent(new Tulip("Тюльпан Уайт Дрім", 42, 36, "Білий", today, "Овальна", false));
 
-        // === РОМАШКИ ===
+
         addFlowerSilent(new Chamomile("Ромашка Польова", 25, 25, "Білий", today.minusDays(1), 1.5, 18));
         addFlowerSilent(new Chamomile("Ромашка Садова", 30, 35, "Білий", today, 2.0, 24));
         addFlowerSilent(new Chamomile("Ромашка Гігантська", 35, 45, "Білий", today, 3.0, 30));
 
-        // === ЛІЛІЇ ===
+
         addFlowerSilent(new Lily("Лілія Касабланка", 120, 70, "Білий", today, "Інтенсивний", 6));
         addFlowerSilent(new Lily("Лілія Стар Гейзер", 130, 75, "Рожевий", today, "Солодкий", 6));
         addFlowerSilent(new Lily("Лілія Азіатська", 95, 60, "Помаранчевий", today.minusDays(1), "Легкий", 6));
         addFlowerSilent(new Lily("Лілія Тигрова", 85, 55, "Помаранчевий", today, "Ніжний", 6));
 
-        // === ПІВОНІЇ ===
+
         addFlowerSilent(new Peony("Півонія Сара Бернар", 150, 50, "Рожевий", today, "Відкритий", true));
         addFlowerSilent(new Peony("Півонія Фестіва Максіма", 160, 55, "Білий", today, "Напіввідкритий", true));
         addFlowerSilent(new Peony("Півонія Ред Чарм", 155, 48, "Червоний", today.minusDays(1), "Бутон", true));
 
-        // === ОРХІДЕЇ ===
+
         addFlowerSilent(new Orchid("Орхідея Фаленопсіс", 200, 45, "Білий", today, "Фаленопсіс", true));
         addFlowerSilent(new Orchid("Орхідея Дендробіум", 180, 50, "Фіолетовий", today, "Дендробіум", true));
         addFlowerSilent(new Orchid("Орхідея Цимбідіум", 220, 60, "Жовтий", today, "Цимбідіум", false));
@@ -79,13 +72,12 @@ public class FlowerShop {
         logger.info("Ініціалізовано багатий каталог: " + catalog.size() + " квітів.");
     }
 
-    /** Додає квітку без логування (для ініціалізації) */
     private void addFlowerSilent(Flower flower) {
         db.insertFlower(flower);
         catalog.add(flower);
     }
 
-    // ==================== Консольні методи ====================
+
 
     public void viewCatalog() {
         System.out.println("=== Каталог квітів ===");
@@ -172,7 +164,7 @@ public class FlowerShop {
         logger.info("Дані зберігаються у БД автоматично.");
     }
 
-    // ==================== GUI-сумісні методи ====================
+
 
     public List<Flower> getCatalog() { return catalog; }
     public List<Bouquet> getBouquets() { return bouquets; }
@@ -242,7 +234,7 @@ public class FlowerShop {
         }
     }
 
-    // ==================== Допоміжні ====================
+
 
     private int readInt(String p) {
         System.out.print(p);

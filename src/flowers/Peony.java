@@ -1,9 +1,6 @@
 package flowers;
 import java.time.LocalDate;
 
-/**
- * Півонія — пишна квітка з різними стадіями цвітіння.
- */
 public class Peony extends Flower {
     private String bloomStage;
     private boolean isFragrant;

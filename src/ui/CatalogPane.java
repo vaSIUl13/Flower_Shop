@@ -19,13 +19,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
 
-/**
- * Панель каталогу квітів з покращеним UI:
- * - 6 типів квітів
- * - ColorPicker-стиль вибору кольору
- * - Валідація вводу
- * - Повноцінна панель фільтрів (як в інтернет-магазині)
- */
 public class CatalogPane extends VBox {
 
     private static final Logger logger = LogManager.getLogger(CatalogPane.class);
@@ -36,7 +29,6 @@ public class CatalogPane extends VBox {
     private ObservableList<Flower> allFlowers;
     private FilteredList<Flower> filteredFlowers;
 
-    // Фільтри
     private TextField nameSearchField;
     private final Map<String, CheckBox> typeCheckboxes = new LinkedHashMap<>();
     private TextField priceMinField;
@@ -46,7 +38,6 @@ public class CatalogPane extends VBox {
     private final Map<String, CheckBox> colorCheckboxes = new LinkedHashMap<>();
     private Label resultsCountLabel;
 
-    // Предвизначені кольори з hex-кодами
     private static final String[][] COLORS = {
             {"Червоний", "#E53935"},
             {"Рожевий", "#EC407A"},
@@ -79,14 +70,12 @@ public class CatalogPane extends VBox {
         setPadding(new Insets(30));
         getStyleClass().add("panel");
 
-        // Заголовок
         Label title = new Label("\uD83C\uDF39  Каталог квітів");
         title.getStyleClass().add("panel-title");
         Label subtitle = new Label("Асортимент із " + shop.getCatalog().size() + " квітів • 6 видів");
         subtitle.getStyleClass().add("panel-subtitle");
         VBox header = new VBox(4, title, subtitle);
 
-        // Основний контент — фільтри зліва, таблиця справа
         HBox content = createContent();
         VBox.setVgrow(content, Priority.ALWAYS);
 
@@ -95,12 +84,10 @@ public class CatalogPane extends VBox {
     }
 
     private HBox createContent() {
-        // Ліва панель — фільтри
         VBox filterPanel = createFilterPanel();
         filterPanel.setMinWidth(240);
         filterPanel.setPrefWidth(260);
 
-        // Права панель — таблиця + кнопки
         VBox tablePanel = createTablePanel();
         HBox.setHgrow(tablePanel, Priority.ALWAYS);
 
@@ -108,35 +95,27 @@ public class CatalogPane extends VBox {
         return content;
     }
 
-    // ==================== ПАНЕЛЬ ФІЛЬТРІВ ====================
+
 
     private VBox createFilterPanel() {
-        // Заголовок фільтрів
         Label filterTitle = new Label("⚙  Фільтри");
         filterTitle.getStyleClass().add("filter-main-title");
 
-        // Пошук за назвою
         VBox nameSection = createNameSearchSection();
 
-        // Тип квітки
         VBox typeSection = createTypeFilterSection();
 
-        // Діапазон цін
         VBox priceSection = createPriceFilterSection();
 
-        // Діапазон стебла
         VBox stemSection = createStemFilterSection();
 
-        // Колір
         VBox colorSection = createColorFilterSection();
 
-        // Кнопка скидання
         Button resetBtn = new Button("↺  Скинути фільтри");
         resetBtn.getStyleClass().add("btn-reset");
         resetBtn.setMaxWidth(Double.MAX_VALUE);
         resetBtn.setOnAction(e -> resetFilters());
 
-        // Лічильник результатів
         resultsCountLabel = new Label("Знайдено: 0 з 0 квітів");
         resultsCountLabel.getStyleClass().add("filter-results-label");
 
@@ -204,7 +183,6 @@ public class CatalogPane extends VBox {
             checkboxes.getChildren().add(cb);
         }
 
-        // Посилання «Обрати все / Зняти все»
         Hyperlink selectAll = new Hyperlink("Обрати все");
         selectAll.getStyleClass().add("filter-link");
         selectAll.setOnAction(e -> {
@@ -284,7 +262,6 @@ public class CatalogPane extends VBox {
             cb.setSelected(true);
             cb.getStyleClass().add("filter-checkbox");
 
-            // Кольоровий маркер
             Rectangle rect = new Rectangle(10, 10);
             rect.setArcWidth(3);
             rect.setArcHeight(3);
@@ -297,7 +274,6 @@ public class CatalogPane extends VBox {
             colorFlow.getChildren().add(cb);
         }
 
-        // Посилання
         Hyperlink selectAll = new Hyperlink("Обрати все");
         selectAll.getStyleClass().add("filter-link");
         selectAll.setOnAction(e -> {
@@ -313,7 +289,7 @@ public class CatalogPane extends VBox {
         return new VBox(6, title, colorFlow, links);
     }
 
-    // ==================== ЛОГІКА ФІЛЬТРАЦІЇ ====================
+
 
     private void applyFilters() {
         if (filteredFlowers == null) return;
@@ -336,21 +312,16 @@ public class CatalogPane extends VBox {
         }
 
         filteredFlowers.setPredicate(flower -> {
-            // Фільтр за назвою
             if (!nameFilter.isEmpty() && !flower.getName().toLowerCase().contains(nameFilter)) {
                 return false;
             }
-            // Фільтр за типом
             if (!selectedTypes.contains(flower.getTypeName())) {
                 return false;
             }
-            // Фільтр за ціною
             if (priceMin != null && flower.getPrice() < priceMin) return false;
             if (priceMax != null && flower.getPrice() > priceMax) return false;
-            // Фільтр за стеблом
             if (stemMin != null && flower.getStemLength() < stemMin) return false;
             if (stemMax != null && flower.getStemLength() > stemMax) return false;
-            // Фільтр за кольором
             if (!selectedColors.contains(flower.getColor())) {
                 return false;
             }
@@ -396,7 +367,7 @@ public class CatalogPane extends VBox {
         }
     }
 
-    // ==================== ТАБЛИЦЯ + КНОПКИ ====================
+
 
     private VBox createTablePanel() {
         table = createTable();
@@ -418,7 +389,6 @@ public class CatalogPane extends VBox {
         TableColumn<Flower, String> typeCol = col("Тип", 90, Flower::getTypeName);
         TableColumn<Flower, String> priceCol = col("Ціна (грн)", 90, f -> String.format("%.2f", f.getPrice()));
 
-        // Колонка кольору з кольоровим квадратиком
         TableColumn<Flower, String> colorCol = new TableColumn<>("Колір");
         colorCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getColor()));
         colorCol.setPrefWidth(110);
@@ -451,7 +421,6 @@ public class CatalogPane extends VBox {
         return tv;
     }
 
-    /** Фабрика колонок для стислості */
     private TableColumn<Flower, String> col(String title, int width, java.util.function.Function<Flower, String> extractor) {
         TableColumn<Flower, String> c = new TableColumn<>(title);
         c.setCellValueFactory(d -> new SimpleStringProperty(extractor.apply(d.getValue())));
@@ -473,7 +442,7 @@ public class CatalogPane extends VBox {
         return box;
     }
 
-    // ==================== ДІАЛОГ ДОДАВАННЯ КВІТКИ ====================
+
 
     private void showAddFlowerDialog() {
         logger.info("Користувач відкрив діалог додавання нової квітки.");
@@ -485,7 +454,6 @@ public class CatalogPane extends VBox {
         ButtonType addBtnType = new ButtonType("Додати", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(addBtnType, ButtonType.CANCEL);
 
-        // Загальні поля
         ComboBox<String> typeBox = new ComboBox<>(FXCollections.observableArrayList(FLOWER_TYPES));
         typeBox.setValue("Троянда");
         typeBox.setMaxWidth(Double.MAX_VALUE);
@@ -495,7 +463,6 @@ public class CatalogPane extends VBox {
 
         TextField priceField = new TextField();
         priceField.setPromptText("0.00");
-        // Числова валідація ціни
         priceField.textProperty().addListener((obs, o, n) -> {
             if (!n.matches("\\d*\\.?\\d*")) priceField.setText(o);
         });
@@ -506,7 +473,6 @@ public class CatalogPane extends VBox {
             if (!n.matches("\\d*\\.?\\d*")) stemField.setText(o);
         });
 
-        // Комбобокс кольору з кольоровими прямокутниками
         ComboBox<String> colorBox = new ComboBox<>();
         for (String[] c : COLORS) colorBox.getItems().add(c[0]);
         colorBox.setValue("Червоний");
@@ -514,13 +480,11 @@ public class CatalogPane extends VBox {
         colorBox.setCellFactory(lv -> createColorCell());
         colorBox.setButtonCell(createColorCell());
 
-        // Специфічні поля для кожного типу
         VBox specificFields = new VBox(8);
         updateSpecificFields(specificFields, "Троянда");
 
         typeBox.setOnAction(e -> updateSpecificFields(specificFields, typeBox.getValue()));
 
-        // Головна сітка
         GridPane grid = new GridPane();
         grid.setHgap(14);
         grid.setVgap(10);
@@ -539,7 +503,6 @@ public class CatalogPane extends VBox {
         ColumnConstraints cc2 = new ColumnConstraints(240);
         grid.getColumnConstraints().addAll(cc1, cc2);
 
-        // Деактивувати кнопку "Додати" поки не заповнено
         dialog.getDialogPane().lookupButton(addBtnType).setDisable(true);
         nameField.textProperty().addListener((o, a, b) -> validateForm(dialog, addBtnType, nameField, priceField, stemField));
         priceField.textProperty().addListener((o, a, b) -> validateForm(dialog, addBtnType, nameField, priceField, stemField));
@@ -588,7 +551,6 @@ public class CatalogPane extends VBox {
         dialog.getDialogPane().lookupButton(btnType).setDisable(!valid);
     }
 
-    /** Оновлює специфічні поля під обраний тип квітки */
     private void updateSpecificFields(VBox container, String type) {
         container.getChildren().clear();
         switch (type) {
@@ -657,7 +619,6 @@ public class CatalogPane extends VBox {
         }
     }
 
-    /** Створює квітку з даних форми */
     @SuppressWarnings("unchecked")
     private Flower buildFlower(String type, String name, double price, double stem, String color, VBox specific) {
         LocalDate today = LocalDate.now();
@@ -684,7 +645,7 @@ public class CatalogPane extends VBox {
         };
     }
 
-    // ==================== Helpers ====================
+
 
     private void deleteSelectedFlower() {
         Flower sel = table.getSelectionModel().getSelectedItem();
@@ -727,7 +688,6 @@ public class CatalogPane extends VBox {
         };
     }
 
-    /** Конвертує українську назву кольору в JavaFX Color */
     private Color colorToFx(String name) {
         for (String[] c : COLORS) {
             if (c[0].equals(name)) return Color.web(c[1]);

@@ -1,9 +1,6 @@
 package flowers;
 import java.time.LocalDate;
 
-/**
- * Орхідея — екзотична квітка різних сортів.
- */
 public class Orchid extends Flower {
     private String variety;
     private boolean isEpiphytic;

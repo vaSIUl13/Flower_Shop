@@ -11,10 +11,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import services.FlowerShop;
 
-/**
- * Головний клас JavaFX-додатку «Квітковий Магазин».
- * Забезпечує бокову навігацію та перемикання між панелями.
- */
 public class FlowerShopApp extends Application {
 
     private static final Logger logger = LogManager.getLogger(FlowerShopApp.class);
@@ -32,7 +28,7 @@ public class FlowerShopApp extends Application {
     public void start(Stage stage) {
         logger.info("Запуск JavaFX-додатку Квітковий Магазин...");
 
-        // Глобальний обробник виняткових ситуацій (критичні помилки → email)
+
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             logger.fatal("Критична необроблена помилка у потоці '" + thread.getName() + "'", throwable);
         });
@@ -47,26 +43,26 @@ public class FlowerShopApp extends Application {
 
         BorderPane root = new BorderPane();
 
-        // Бокова панель
+
         VBox sidebar = createSidebar();
         root.setLeft(sidebar);
 
-        // Область контенту
+
         contentArea = new StackPane();
         contentArea.getStyleClass().add("content-area");
         root.setCenter(contentArea);
 
-        // Статус-бар
+
         HBox statusBar = createStatusBar();
         root.setBottom(statusBar);
 
-        // Створення панелей
+
         catalogPane = new CatalogPane(shop, this::setStatus);
         bouquetPane = new BouquetPane(shop, this::setStatus);
         searchPane = new SearchPane(shop, this::setStatus);
         logger.info("UI-панелі (Каталог, Букети, Пошук) створено.");
 
-        // Показати каталог за замовчуванням
+
         showCatalog(null);
 
         Scene scene = new Scene(root, 1100, 720);
@@ -78,7 +74,7 @@ public class FlowerShopApp extends Application {
         stage.setMinHeight(600);
         stage.show();
 
-        // Логування закриття додатку
+
         stage.setOnCloseRequest(event -> {
             logger.info("Користувач закрив додаток. Завершення роботи.");
         });
@@ -86,10 +82,10 @@ public class FlowerShopApp extends Application {
         logger.info("Додаток запущено та готовий до роботи.");
     }
 
-    /* ================ Бокова панель ================ */
+
 
     private VBox createSidebar() {
-        // Логотип
+
         Label logo = new Label("\uD83C\uDF3C Квітковий");
         logo.getStyleClass().add("sidebar-logo");
         Label logoSub = new Label("М А Г А З И Н");
@@ -101,7 +97,7 @@ public class FlowerShopApp extends Application {
         Region sep1 = new Region();
         sep1.getStyleClass().add("sidebar-separator");
 
-        // Кнопки навігації
+
         Button btnCatalog = createSidebarButton("\uD83C\uDF39  Каталог");
         btnCatalog.setOnAction(e -> showCatalog(btnCatalog));
         activeButton = btnCatalog;
@@ -123,7 +119,7 @@ public class FlowerShopApp extends Application {
             setStatus("✅ Усі дані збережено в базі даних SQLite автоматично!");
         });
 
-        // Spacer
+
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
@@ -151,7 +147,7 @@ public class FlowerShopApp extends Application {
         }
     }
 
-    /* ================ Навігація ================ */
+
 
     private void showCatalog(Button btn) {
         logger.info("Навігація: перехід до панелі 'Каталог'.");
@@ -174,7 +170,7 @@ public class FlowerShopApp extends Application {
         setActiveButton(btn);
     }
 
-    /* ================ Статус-бар ================ */
+
 
     private HBox createStatusBar() {
         statusLabel = new Label("Ласкаво просимо до Квіткового Магазину! \uD83C\uDF3B");

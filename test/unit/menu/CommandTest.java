@@ -3,14 +3,10 @@ package menu;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Тест для інтерфейсу Command.
- */
 class CommandTest {
 
     @Test
     void testCommandExecutes() {
-        // Перевіряємо що лямбда-реалізація Command працює
         final boolean[] executed = {false};
         Command cmd = () -> executed[0] = true;
         cmd.execute();

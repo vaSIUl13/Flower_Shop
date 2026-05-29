@@ -92,7 +92,7 @@ public class DatabaseManager {
         }
     }
 
-    // ==================== КВІТИ ====================
+
     public int insertFlower(Flower flower) {
         String sql = "INSERT INTO flowers (type, name, price, stem_length, color, freshness_date, "
                 + "has_thorns, bud_shape, petal_shape, is_double, core_size, petal_count, "
@@ -180,7 +180,7 @@ public class DatabaseManager {
         }
     }
 
-    // ==================== БУКЕТИ ====================
+
     public int insertBouquet(Bouquet bouquet) {
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement("INSERT INTO bouquets (name) VALUES (?)", Statement.RETURN_GENERATED_KEYS)) {
@@ -268,7 +268,7 @@ public class DatabaseManager {
         }
     }
 
-    // ==================== ЗВ'ЯЗОК БУКЕТ-КВІТКА ====================
+
     public void addFlowerToBouquet(int bouquetId, int flowerId) {
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement("INSERT INTO bouquet_flowers (bouquet_id, flower_id) VALUES (?, ?)")) {
@@ -294,7 +294,7 @@ public class DatabaseManager {
         }
     }
 
-    // ==================== АКСЕСУАРИ ====================
+
     public int insertAccessory(int bouquetId, Accessory accessory) {
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement("INSERT INTO accessories (bouquet_id, name, price, color) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
@@ -327,7 +327,7 @@ public class DatabaseManager {
         }
     }
 
-    // ==================== Допоміжні ====================
+
     private Flower buildFlowerFromResultSet(ResultSet rs) throws SQLException {
         String type = rs.getString("type");
         String name = rs.getString("name");

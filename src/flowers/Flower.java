@@ -27,7 +27,6 @@ public abstract class Flower implements Serializable {
     public String getColor() { return color; }
     public LocalDate getFreshnessDate() { return freshnessDate; }
 
-    /** Повертає українську назву типу квітки (поліморфізм). */
     public abstract String getTypeName();
 
     @Override

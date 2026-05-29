@@ -23,7 +23,6 @@ class FlowerShopAppTest {
         app.start(stage);
     }
 
-    // ==================== ТЕСТИ НАВІГАЦІЇ ====================
 
     @Test
     @Order(1)
@@ -53,7 +52,6 @@ class FlowerShopAppTest {
         verifyThat("🌹  Каталог квітів", (Label label) -> label.isVisible());
     }
 
-    // ==================== ТЕСТИ КАТАЛОГУ ТА ФІЛЬТРІВ ====================
 
     @Test
     @Order(10)
@@ -63,14 +61,12 @@ class FlowerShopAppTest {
 
         robot.clickOn("＋  Додати квітку");
 
-        // Обмежуємо пошук текстових полів лише всередині відкритого діалогу
         DialogPane dialogPane = robot.lookup(".dialog-pane").queryAs(DialogPane.class);
         
         TextField nameField = robot.from(dialogPane).lookup(".text-field").nth(0).queryAs(TextField.class);
         TextField priceField = robot.from(dialogPane).lookup(".text-field").nth(1).queryAs(TextField.class);
         TextField stemField = robot.from(dialogPane).lookup(".text-field").nth(2).queryAs(TextField.class);
 
-        // Заповнюємо поля
         robot.clickOn(nameField).write("Тестова Троянда");
         robot.clickOn(priceField).write("99");
         robot.clickOn(stemField).write("50");
@@ -84,16 +80,14 @@ class FlowerShopAppTest {
     @Order(11)
     void testCatalogNameFilter(FxRobot robot) {
         TableView<?> table = robot.lookup(".table-view").queryAs(TableView.class);
-        
-        // Знаходимо поле пошуку за prompt text або CSS
+
         TextField searchField = robot.lookup(".search-field").queryAs(TextField.class);
         
         robot.clickOn(searchField).write("Тестова Троянда");
-        
-        // Має лишитися хоча б одна або скільки завгодно, головне перевірити фільтрацію
+
         assertTrue(table.getItems().size() > 0);
         
-        robot.clickOn(searchField).eraseText(15); // очищаємо
+        robot.clickOn(searchField).eraseText(15);
     }
 
     @Test
@@ -101,20 +95,15 @@ class FlowerShopAppTest {
     void testCatalogResetFilters(FxRobot robot) {
         TableView<?> table = robot.lookup(".table-view").queryAs(TableView.class);
         int allCount = table.getItems().size();
-        
-        // Змінюємо фільтри, натискаючи на лінк "Зняти все"
+
         javafx.scene.Node link = robot.lookup(".filter-link").nth(1).query();
         robot.clickOn(link);
-        
-        // Таблиця повинна очиститись або змінити розмір
+
         assertTrue(table.getItems().size() <= allCount);
-        
-        // Кнопка скидання може бути за межами видимості ScrollPane,
-        // тому викликаємо її програмно через interact
+
         Button resetBtn = robot.lookup(".btn-reset").queryAs(Button.class);
         robot.interact(resetBtn::fire);
-        
-        // Перевіряємо, що розмір відновився
+
         assertEquals(allCount, table.getItems().size());
     }
 
@@ -123,8 +112,7 @@ class FlowerShopAppTest {
     void testDeleteFlower(FxRobot robot) {
         TableView<?> table = robot.lookup(".table-view").queryAs(TableView.class);
         int sizeBefore = table.getItems().size();
-        
-        // Вибираємо останній рядок
+
         robot.interact(() -> {
             table.getSelectionModel().select(sizeBefore - 1);
         });
@@ -133,7 +121,7 @@ class FlowerShopAppTest {
         assertEquals(sizeBefore - 1, table.getItems().size());
     }
 
-    // ==================== ТЕСТИ БУКЕТІВ ====================
+
 
     @Test
     @Order(20)
@@ -162,7 +150,7 @@ class FlowerShopAppTest {
         });
 
         robot.clickOn("✏  Перейменувати");
-        robot.eraseText(9); // очищаємо "GUI Букет"
+        robot.eraseText(9);
         robot.write("Перейменований Букет");
         robot.clickOn("OK");
 
@@ -176,7 +164,6 @@ class FlowerShopAppTest {
         @SuppressWarnings("unchecked")
         ListView<String> list = (ListView<String>) robot.lookup(".list-view").queryAs(ListView.class);
         
-        // Поле пошуку букету має клас search-field
         TextField searchField = robot.lookup(".search-field").queryAs(TextField.class);
         robot.clickOn(searchField).write("Перейменований");
         
@@ -202,7 +189,7 @@ class FlowerShopAppTest {
         assertEquals(sizeBefore - 1, list.getItems().size());
     }
 
-    // ==================== ТЕСТИ ПОШУКУ (Розділ) ====================
+
 
     @Test
     @Order(30)

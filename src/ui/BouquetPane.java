@@ -19,9 +19,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-/**
- * Панель управління букетами — створення, редагування, сортування.
- */
 public class BouquetPane extends VBox {
 
     private static final Logger logger = LogManager.getLogger(BouquetPane.class);
@@ -39,7 +36,6 @@ public class BouquetPane extends VBox {
     private Label detailTitle;
     private VBox detailBox;
 
-    // Предвизначені аксесуари: {назва, ціна}
     private static final String[][] PREDEFINED_ACCESSORIES = {
             {"Стрічка атласна", "15"},
             {"Стрічка органза", "20"},
@@ -61,7 +57,6 @@ public class BouquetPane extends VBox {
             {"Піропатрон (бенгальський вогонь)", "35"},
     };
 
-    // Кольори для аксесуарів
     private static final String[][] ACC_COLORS = {
             {"Червоний", "#E53935"}, {"Рожевий", "#EC407A"}, {"Білий", "#FAFAFA"},
             {"Жовтий", "#FDD835"}, {"Помаранчевий", "#FB8C00"}, {"Фіолетовий", "#8E24AA"},
@@ -78,14 +73,12 @@ public class BouquetPane extends VBox {
         setPadding(new Insets(30));
         getStyleClass().add("panel");
 
-        // Заголовок
         Label title = new Label("\uD83D\uDC90  Управління букетами");
         title.getStyleClass().add("panel-title");
         Label subtitle = new Label("Створюйте та наповнюйте букети з квітів каталогу");
         subtitle.getStyleClass().add("panel-subtitle");
         VBox header = new VBox(4, title, subtitle);
 
-        // Основний контент — SplitPane
         HBox content = createContent();
         VBox.setVgrow(content, Priority.ALWAYS);
 
@@ -94,12 +87,10 @@ public class BouquetPane extends VBox {
     }
 
     private HBox createContent() {
-        // Ліва панель — список букетів
         VBox leftPanel = createBouquetListPanel();
         leftPanel.setMinWidth(220);
         leftPanel.setPrefWidth(240);
 
-        // Права панель — деталі букету
         detailBox = createDetailPanel();
         HBox.setHgrow(detailBox, Priority.ALWAYS);
 
@@ -111,7 +102,6 @@ public class BouquetPane extends VBox {
         Label listTitle = new Label("Список букетів");
         listTitle.getStyleClass().add("section-title");
 
-        // Поле пошуку букетів
         searchField = new TextField();
         searchField.setPromptText("\uD83D\uDD0D  Пошук букету...");
         searchField.getStyleClass().add("search-field");
@@ -124,7 +114,6 @@ public class BouquetPane extends VBox {
         bouquetList.setPlaceholder(new Label("Ще немає букетів"));
         VBox.setVgrow(bouquetList, Priority.ALWAYS);
 
-        // Фільтрація при введенні тексту
         searchField.textProperty().addListener((obs, oldVal, newVal) -> {
             String filter = newVal == null ? "" : newVal.trim().toLowerCase();
             if (filter.isEmpty()) {
@@ -139,7 +128,6 @@ public class BouquetPane extends VBox {
 
         bouquetList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
-                // Знаходимо реальний індекс у повному списку
                 int realIndex = bouquetNames.indexOf(newVal);
                 showBouquetDetails(realIndex);
             } else {
@@ -171,7 +159,6 @@ public class BouquetPane extends VBox {
         detailTitle = new Label("Оберіть букет зі списку");
         detailTitle.getStyleClass().add("section-title");
 
-        // Таблиця квітів у букеті
         Label flowersLabel = new Label("Квіти:");
         flowersLabel.getStyleClass().add("section-title");
 
@@ -198,7 +185,6 @@ public class BouquetPane extends VBox {
         flowersTable.getColumns().addAll(fNameCol, fTypeCol, fPriceCol, fColorCol);
         flowersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        // Таблиця аксесуарів
         Label accLabel = new Label("Аксесуари:");
         accLabel.getStyleClass().add("section-title");
 
@@ -238,7 +224,6 @@ public class BouquetPane extends VBox {
         accessoriesTable.getColumns().addAll(aNameCol, aColorCol, aPriceCol);
         accessoriesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        // Кнопки дій
         Button addFlowerBtn = new Button("＋ Квітку");
         addFlowerBtn.getStyleClass().add("btn-primary");
         addFlowerBtn.setOnAction(e -> addFlowerToBouquet());
@@ -265,7 +250,6 @@ public class BouquetPane extends VBox {
         HBox actionRow2 = new HBox(10, sortBtn);
         actionRow2.setAlignment(Pos.CENTER_LEFT);
 
-        // Ціна
         priceLabel = new Label("Загальна вартість: 0.00 грн");
         priceLabel.getStyleClass().add("price-label");
 
@@ -332,7 +316,6 @@ public class BouquetPane extends VBox {
                 String oldName = b.getName();
                 shop.renameBouquet(b, newName.trim());
                 refresh();
-                // Вибрати перейменований букет у списку
                 bouquetList.getSelectionModel().select(newName.trim());
                 logger.info("Перейменовано букет: \"" + oldName + "\" → \"" + newName.trim() + "\" через UI.");
                 statusCallback.accept("✏ Букет перейменовано: \"" + oldName + "\" → \"" + newName.trim() + "\"");
@@ -368,7 +351,6 @@ public class BouquetPane extends VBox {
 
         Optional<Flower> result = dialog.showAndWait();
         result.ifPresent(flower -> {
-            // Запитати кількість
             TextInputDialog qtyDialog = new TextInputDialog("1");
             qtyDialog.setTitle("Кількість");
             qtyDialog.setHeaderText("Скільки додати?");
@@ -416,7 +398,6 @@ public class BouquetPane extends VBox {
         ButtonType addType = new ButtonType("Додати", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(addType, ButtonType.CANCEL);
 
-        // Комбобокс з предвизначеними аксесуарами
         ComboBox<String> accBox = new ComboBox<>();
         for (String[] a : PREDEFINED_ACCESSORIES) {
             accBox.getItems().add(a[0] + "  —  " + a[1] + " грн");
@@ -424,7 +405,6 @@ public class BouquetPane extends VBox {
         accBox.setValue(accBox.getItems().get(0));
         accBox.setMaxWidth(Double.MAX_VALUE);
 
-        // Поле ціни — автозаповнення, тільки для читання
         Label priceDisplay = new Label(PREDEFINED_ACCESSORIES[0][1] + " грн");
         priceDisplay.getStyleClass().add("price-label");
 
@@ -435,7 +415,6 @@ public class BouquetPane extends VBox {
             }
         });
 
-        // Комбобокс кольору з кольоровими маркерами
         ComboBox<String> colorBox = new ComboBox<>();
         for (String[] c : ACC_COLORS) colorBox.getItems().add(c[0]);
         colorBox.setValue("Білий");
@@ -525,7 +504,6 @@ public class BouquetPane extends VBox {
         for (Bouquet b : shop.getBouquets()) {
             bouquetNames.add(b.getName());
         }
-        // Зберігаємо фільтр після оновлення
         String filter = searchField.getText();
         if (filter != null && !filter.trim().isEmpty()) {
             String f = filter.trim().toLowerCase();
@@ -542,7 +520,7 @@ public class BouquetPane extends VBox {
         }
     }
 
-    // ==================== Допоміжні методи кольорів ====================
+
 
     private ListCell<String> createAccColorCell() {
         return new ListCell<>() {

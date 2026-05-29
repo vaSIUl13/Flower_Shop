@@ -14,9 +14,6 @@ import flowers.*;
 import java.util.List;
 import java.util.function.Consumer;
 
-/**
- * Панель пошуку квітів у букеті за довжиною стебла.
- */
 public class SearchPane extends VBox {
 
     private static final Logger logger = LogManager.getLogger(SearchPane.class);
@@ -37,17 +34,17 @@ public class SearchPane extends VBox {
         setPadding(new Insets(30));
         getStyleClass().add("panel");
 
-        // Заголовок
+
         Label title = new Label("\uD83D\uDD0D  Пошук квітів");
         title.getStyleClass().add("panel-title");
         Label subtitle = new Label("Знайдіть квіти у букеті за довжиною стебла");
         subtitle.getStyleClass().add("panel-subtitle");
         VBox header = new VBox(4, title, subtitle);
 
-        // Форма пошуку
+
         VBox searchForm = createSearchForm();
 
-        // Результати
+
         VBox resultsBox = createResultsPanel();
         VBox.setVgrow(resultsBox, Priority.ALWAYS);
 

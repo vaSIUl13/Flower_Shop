@@ -17,7 +17,6 @@ public class ConsoleMenu {
     public ConsoleMenu(FlowerShop shop) {
         this.shop = shop;
 
-        // Реєстрація команд
         menuItems.put("Переглянути каталог", shop::viewCatalog);
         menuItems.put("Додати квітку", shop::addFlowerToCatalog);
         menuItems.put("Створити букет", shop::createBouquet);

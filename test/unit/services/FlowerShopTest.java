@@ -6,10 +6,6 @@ import java.time.LocalDate;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Тести для сервісу FlowerShop.
- * Перевіряє логіку додавання, видалення, створення букетів тощо.
- */
 class FlowerShopTest {
 
     private FlowerShop shop;
@@ -19,11 +15,10 @@ class FlowerShopTest {
         shop = new FlowerShop();
     }
 
-    // ==================== КАТАЛОГ ====================
+
 
     @Test
     void testCatalogNotEmpty() {
-        // FlowerShop ініціалізує каталог, якщо він порожній
         assertFalse(shop.getCatalog().isEmpty());
     }
 
@@ -58,7 +53,7 @@ class FlowerShopTest {
         assertEquals(initialSize, shop.getCatalog().size());
     }
 
-    // ==================== БУКЕТИ ====================
+
 
     @Test
     void testCreateNewBouquet() {
@@ -101,7 +96,7 @@ class FlowerShopTest {
         assertEquals("Після Перейменування", loaded.getName());
     }
 
-    // ==================== КВІТИ В БУКЕТІ ====================
+
 
     @Test
     void testAddFlowerToBouquet() {
@@ -137,7 +132,7 @@ class FlowerShopTest {
         assertEquals(1, b.getFlowers().size());
     }
 
-    // ==================== АКСЕСУАРИ ====================
+
 
     @Test
     void testAddAccessoryToBouquet() {
@@ -171,11 +166,10 @@ class FlowerShopTest {
         assertEquals(1, b.getAccessories().size());
     }
 
-    // ==================== ДОПОМІЖНІ ====================
+
 
     @Test
     void testSaveCatalogToFile() {
-        // Метод просто логує; не повинен кидати виняток
         assertDoesNotThrow(() -> shop.saveCatalogToFile());
     }
 

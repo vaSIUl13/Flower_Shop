@@ -3,9 +3,6 @@ package flowers;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Тести для класу Accessory.
- */
 class AccessoryTest {
 
     @Test
@@ -47,7 +44,6 @@ class AccessoryTest {
         String str = acc.toString();
         assertTrue(str.contains("Папір"));
         assertTrue(str.contains("30.0 грн"));
-        // Не повинен містити ", " перед ціною, бо кольору немає
         assertFalse(str.contains(", ("));
     }
 

@@ -13,7 +13,6 @@ public class Accessory implements Serializable {
         this.color = color;
     }
 
-    /** Конструктор без кольору (для сумісності) */
     public Accessory(String name, double price) {
         this(name, price, "");
     }

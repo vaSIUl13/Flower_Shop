@@ -4,10 +4,6 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Тести для абстрактного класу Flower (через підклас Rose).
- * Перевіряє базову функціональність: getters, setters, toString.
- */
 class FlowerTest {
 
     @Test
@@ -59,7 +55,6 @@ class FlowerTest {
         Rose flower = new Rose("Моя Троянда", 85.50, 55, "Рожевий",
                 LocalDate.now(), true, "Келих");
         String str = flower.toString();
-        // Базовий toString у Flower містить ім'я, ціну, колір, довжину
         assertTrue(str.contains("Моя Троянда"));
         assertTrue(str.contains("85,50") || str.contains("85.50"));
         assertTrue(str.contains("Рожевий"));
