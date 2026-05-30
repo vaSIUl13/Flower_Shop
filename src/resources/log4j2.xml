@@ -22,12 +22,12 @@
         <!-- Email аппендер — надсилає ТІЛЬКИ критичні помилки (FATAL та ERROR) -->
         <SMTP name="MailLogger"
               subject="CRITICAL ERROR: FlowerShop App"
-              to="hide_email@gmail.com"
-              from="hide_email@gmail.com"
+              to="mygchinkavasil@gmail.com"
+              from="mygchinkavasil@gmail.com"
               smtpHost="smtp.gmail.com"
               smtpPort="465"
-              smtpUsername="hide_email@gmail.com"
-              smtpPassword="xxxx xxxx xxxx xxxx"
+              smtpUsername="mygchinkavasil@gmail.com"
+              smtpPassword="vaSIUl30177"
               smtpProtocol="smtps"
               smtpDebug="false"
               bufferSize="512">
