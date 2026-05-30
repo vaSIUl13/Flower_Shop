@@ -6,9 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Тести для класу Bouquet.
- */
+
 class BouquetTest {
 
     private Bouquet bouquet;
@@ -72,41 +70,39 @@ class BouquetTest {
 
     @Test
     void testCalculateTotalPriceWithFlowersOnly() {
-        bouquet.addFlower(rose);  // 80
-        bouquet.addFlower(tulip); // 40
+        bouquet.addFlower(rose);
+        bouquet.addFlower(tulip);
         assertEquals(120, bouquet.calculateTotalPrice(), 0.01);
     }
 
     @Test
     void testCalculateTotalPriceWithFlowersAndAccessories() {
-        bouquet.addFlower(rose);       // 80
-        bouquet.addFlower(tulip);      // 40
-        bouquet.addAccessory(new Accessory("Стрічка", 15, "Білий")); // 15
-        bouquet.addAccessory(new Accessory("Папір", 30));             // 30
+        bouquet.addFlower(rose);
+        bouquet.addFlower(tulip);
+        bouquet.addAccessory(new Accessory("Стрічка", 15, "Білий"));
+        bouquet.addAccessory(new Accessory("Папір", 30));
         assertEquals(165, bouquet.calculateTotalPrice(), 0.01);
     }
 
     @Test
     void testSortFlowersByFreshness() {
-        // Додаємо квіти з різними датами свіжості
-        bouquet.addFlower(tulip);      // 2026-05-18 (найстаріша)
-        bouquet.addFlower(chamomile);  // 2026-05-19
-        bouquet.addFlower(rose);       // 2026-05-20 (найсвіжіша)
+        bouquet.addFlower(tulip);
+        bouquet.addFlower(chamomile);
+        bouquet.addFlower(rose);
 
-        bouquet.sortFlowersByFreshness(); // За спаданням (найсвіжіші перші)
+        bouquet.sortFlowersByFreshness();
 
-        assertEquals(rose, bouquet.getFlowers().get(0));       // 2026-05-20
-        assertEquals(chamomile, bouquet.getFlowers().get(1));  // 2026-05-19
-        assertEquals(tulip, bouquet.getFlowers().get(2));      // 2026-05-18
+        assertEquals(rose, bouquet.getFlowers().get(0));
+        assertEquals(chamomile, bouquet.getFlowers().get(1));
+        assertEquals(tulip, bouquet.getFlowers().get(2));
     }
 
     @Test
     void testFindFlowersByStemLength() {
-        bouquet.addFlower(rose);       // 60 см
-        bouquet.addFlower(tulip);      // 35 см
-        bouquet.addFlower(chamomile);  // 25 см
+        bouquet.addFlower(rose);
+        bouquet.addFlower(tulip);
+        bouquet.addFlower(chamomile);
 
-        // Пошук квітів зі стеблом 30-65 см
         List<Flower> result = bouquet.findFlowersByStemLength(30, 65);
         assertEquals(2, result.size());
         assertTrue(result.contains(rose));
@@ -115,8 +111,8 @@ class BouquetTest {
 
     @Test
     void testFindFlowersByStemLengthNoResults() {
-        bouquet.addFlower(rose);       // 60 см
-        bouquet.addFlower(tulip);      // 35 см
+        bouquet.addFlower(rose);
+        bouquet.addFlower(tulip);
 
         List<Flower> result = bouquet.findFlowersByStemLength(100, 200);
         assertTrue(result.isEmpty());
@@ -124,7 +120,7 @@ class BouquetTest {
 
     @Test
     void testFindFlowersByStemLengthExactBounds() {
-        bouquet.addFlower(rose);  // 60 см
+        bouquet.addFlower(rose);
         List<Flower> result = bouquet.findFlowersByStemLength(60, 60);
         assertEquals(1, result.size());
     }
@@ -141,8 +137,8 @@ class BouquetTest {
     @Test
     void testRemoveFlowerInvalidIndex() {
         bouquet.addFlower(rose);
-        bouquet.removeFlower(-1);  // Невалідний
-        bouquet.removeFlower(5);   // Невалідний
+        bouquet.removeFlower(-1);
+        bouquet.removeFlower(5);
         assertEquals(1, bouquet.getFlowers().size());
     }
 

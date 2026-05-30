@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConsoleMenu.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">menu</a> &gt; <span class="el_source">ConsoleMenu.java</span></div><h1>ConsoleMenu.java</h1><pre class="source lang-java linenums">package menu;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import services.FlowerShop;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class ConsoleMenu {
+<span class="fc" id="L11">    private static final Logger logger = LogManager.getLogger(ConsoleMenu.class);</span>
+
+<span class="fc" id="L13">    private Map&lt;String, Command&gt; menuItems = new LinkedHashMap&lt;&gt;();</span>
+    private FlowerShop shop;
+<span class="fc" id="L15">    private Scanner scanner = new Scanner(System.in);</span>
+
+<span class="fc" id="L17">    public ConsoleMenu(FlowerShop shop) {</span>
+<span class="fc" id="L18">        this.shop = shop;</span>
+
+<span class="fc" id="L20">        menuItems.put(&quot;Переглянути каталог&quot;, shop::viewCatalog);</span>
+<span class="fc" id="L21">        menuItems.put(&quot;Додати квітку&quot;, shop::addFlowerToCatalog);</span>
+<span class="fc" id="L22">        menuItems.put(&quot;Створити букет&quot;, shop::createBouquet);</span>
+<span class="fc" id="L23">        menuItems.put(&quot;Переглянути букети&quot;, shop::viewAllBouquets);</span>
+<span class="fc" id="L24">        menuItems.put(&quot;Редагувати букет&quot;, shop::editBouquet);</span>
+<span class="fc" id="L25">        menuItems.put(&quot;Сортувати букет&quot;, shop::sortBouquet);</span>
+<span class="fc" id="L26">        menuItems.put(&quot;Зберегти і вийти&quot;, () -&gt; {</span>
+<span class="nc" id="L27">            shop.saveCatalogToFile();</span>
+<span class="nc" id="L28">            logger.info(&quot;Користувач завершив роботу через консольне меню.&quot;);</span>
+<span class="nc" id="L29">            System.exit(0);</span>
+<span class="nc" id="L30">        });</span>
+
+<span class="fc" id="L32">        logger.info(&quot;Консольне меню ініціалізовано з &quot; + menuItems.size() + &quot; командами.&quot;);</span>
+<span class="fc" id="L33">    }</span>
+
+    public void run() {
+<span class="fc" id="L36">        logger.info(&quot;Запущено консольний режим роботи.&quot;);</span>
+        while (true) {
+<span class="fc" id="L38">            System.out.println(&quot;\n=== МЕНЮ МАГАЗИНУ ===&quot;);</span>
+<span class="fc" id="L39">            int i = 1;</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">            for (String key : menuItems.keySet()) {</span>
+<span class="fc" id="L41">                System.out.println(i++ + &quot;. &quot; + key);</span>
+<span class="fc" id="L42">            }</span>
+<span class="fc" id="L43">            System.out.print(&quot;Ваш вибір: &quot;);</span>
+
+<span class="fc bfc" id="L45" title="All 2 branches covered.">            if (scanner.hasNextInt()) {</span>
+<span class="fc" id="L46">                int choice = scanner.nextInt();</span>
+<span class="pc bpc" id="L47" title="1 of 4 branches missed.">                if (choice &gt; 0 &amp;&amp; choice &lt;= menuItems.size()) {</span>
+<span class="fc" id="L48">                    String key = (String) menuItems.keySet().toArray()[choice - 1];</span>
+<span class="fc" id="L49">                    logger.info(&quot;Користувач обрав пункт меню: &quot; + choice + &quot; (&quot; + key + &quot;)&quot;);</span>
+                    try {
+<span class="fc" id="L51">                        menuItems.get(key).execute();</span>
+<span class="nc" id="L52">                    } catch (Exception e) {</span>
+<span class="nc" id="L53">                        logger.error(&quot;Помилка при виконанні команди '&quot; + key + &quot;'!&quot;, e);</span>
+<span class="nc" id="L54">                        System.out.println(&quot;Сталася помилка: &quot; + e.getMessage());</span>
+<span class="fc" id="L55">                    }</span>
+<span class="fc" id="L56">                } else {</span>
+<span class="fc" id="L57">                    logger.warn(&quot;Невірний вибір пункту меню: &quot; + choice);</span>
+<span class="fc" id="L58">                    System.out.println(&quot;Невірний вибір.&quot;);</span>
+                }
+<span class="fc" id="L60">            } else {</span>
+<span class="fc" id="L61">                scanner.next();</span>
+            }
+<span class="fc" id="L63">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

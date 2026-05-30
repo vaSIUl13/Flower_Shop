@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FlowerShopApp.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">ui</a> &gt; <span class="el_source">FlowerShopApp.java</span></div><h1>FlowerShopApp.java</h1><pre class="source lang-java linenums">package ui;
+
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import services.FlowerShop;
+
+<span class="fc" id="L14">public class FlowerShopApp extends Application {</span>
+
+<span class="fc" id="L16">    private static final Logger logger = LogManager.getLogger(FlowerShopApp.class);</span>
+    private FlowerShop shop;
+    private StackPane contentArea;
+    private Label statusLabel;
+
+    private CatalogPane catalogPane;
+    private BouquetPane bouquetPane;
+    private SearchPane searchPane;
+
+    private Button activeButton;
+
+    @Override
+    public void start(Stage stage) {
+<span class="fc" id="L29">        logger.info(&quot;Запуск JavaFX-додатку Квітковий Магазин...&quot;);</span>
+
+
+<span class="fc" id="L32">        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -&gt; {</span>
+<span class="nc" id="L33">            logger.fatal(&quot;Критична необроблена помилка у потоці '&quot; + thread.getName() + &quot;'&quot;, throwable);</span>
+<span class="nc" id="L34">        });</span>
+
+        try {
+<span class="fc" id="L37">            shop = new FlowerShop();</span>
+<span class="fc" id="L38">            logger.info(&quot;Сервіс FlowerShop ініціалізовано успішно.&quot;);</span>
+<span class="nc" id="L39">        } catch (Exception e) {</span>
+<span class="nc" id="L40">            logger.fatal(&quot;Не вдалося ініціалізувати FlowerShop!&quot;, e);</span>
+<span class="nc" id="L41">            throw e;</span>
+<span class="fc" id="L42">        }</span>
+
+<span class="fc" id="L44">        BorderPane root = new BorderPane();</span>
+
+
+<span class="fc" id="L47">        VBox sidebar = createSidebar();</span>
+<span class="fc" id="L48">        root.setLeft(sidebar);</span>
+
+
+<span class="fc" id="L51">        contentArea = new StackPane();</span>
+<span class="fc" id="L52">        contentArea.getStyleClass().add(&quot;content-area&quot;);</span>
+<span class="fc" id="L53">        root.setCenter(contentArea);</span>
+
+
+<span class="fc" id="L56">        HBox statusBar = createStatusBar();</span>
+<span class="fc" id="L57">        root.setBottom(statusBar);</span>
+
+
+<span class="fc" id="L60">        catalogPane = new CatalogPane(shop, this::setStatus);</span>
+<span class="fc" id="L61">        bouquetPane = new BouquetPane(shop, this::setStatus);</span>
+<span class="fc" id="L62">        searchPane = new SearchPane(shop, this::setStatus);</span>
+<span class="fc" id="L63">        logger.info(&quot;UI-панелі (Каталог, Букети, Пошук) створено.&quot;);</span>
+
+
+<span class="fc" id="L66">        showCatalog(null);</span>
+
+<span class="fc" id="L68">        Scene scene = new Scene(root, 1100, 720);</span>
+<span class="fc" id="L69">        scene.getStylesheets().add(getClass().getResource(&quot;styles.css&quot;).toExternalForm());</span>
+
+<span class="fc" id="L71">        stage.setTitle(&quot;\uD83C\uDF38 Квітковий Магазин&quot;);</span>
+<span class="fc" id="L72">        stage.setScene(scene);</span>
+<span class="fc" id="L73">        stage.setMinWidth(900);</span>
+<span class="fc" id="L74">        stage.setMinHeight(600);</span>
+<span class="fc" id="L75">        stage.show();</span>
+
+
+<span class="fc" id="L78">        stage.setOnCloseRequest(event -&gt; {</span>
+<span class="nc" id="L79">            logger.info(&quot;Користувач закрив додаток. Завершення роботи.&quot;);</span>
+<span class="nc" id="L80">        });</span>
+
+<span class="fc" id="L82">        logger.info(&quot;Додаток запущено та готовий до роботи.&quot;);</span>
+<span class="fc" id="L83">    }</span>
+
+
+
+    private VBox createSidebar() {
+
+<span class="fc" id="L89">        Label logo = new Label(&quot;\uD83C\uDF3C Квітковий&quot;);</span>
+<span class="fc" id="L90">        logo.getStyleClass().add(&quot;sidebar-logo&quot;);</span>
+<span class="fc" id="L91">        Label logoSub = new Label(&quot;М А Г А З И Н&quot;);</span>
+<span class="fc" id="L92">        logoSub.getStyleClass().add(&quot;sidebar-logo-sub&quot;);</span>
+<span class="fc" id="L93">        VBox logoBox = new VBox(2, logo, logoSub);</span>
+<span class="fc" id="L94">        logoBox.getStyleClass().add(&quot;sidebar-header&quot;);</span>
+<span class="fc" id="L95">        logoBox.setAlignment(Pos.CENTER);</span>
+
+<span class="fc" id="L97">        Region sep1 = new Region();</span>
+<span class="fc" id="L98">        sep1.getStyleClass().add(&quot;sidebar-separator&quot;);</span>
+
+
+<span class="fc" id="L101">        Button btnCatalog = createSidebarButton(&quot;\uD83C\uDF39  Каталог&quot;);</span>
+<span class="fc" id="L102">        btnCatalog.setOnAction(e -&gt; showCatalog(btnCatalog));</span>
+<span class="fc" id="L103">        activeButton = btnCatalog;</span>
+<span class="fc" id="L104">        btnCatalog.getStyleClass().add(&quot;sidebar-btn-active&quot;);</span>
+
+<span class="fc" id="L106">        Button btnBouquets = createSidebarButton(&quot;\uD83D\uDC90  Букети&quot;);</span>
+<span class="fc" id="L107">        btnBouquets.setOnAction(e -&gt; showBouquets(btnBouquets));</span>
+
+<span class="fc" id="L109">        Button btnSearch = createSidebarButton(&quot;\uD83D\uDD0D  Пошук&quot;);</span>
+<span class="fc" id="L110">        btnSearch.setOnAction(e -&gt; showSearch(btnSearch));</span>
+
+<span class="fc" id="L112">        Region sep2 = new Region();</span>
+<span class="fc" id="L113">        sep2.getStyleClass().add(&quot;sidebar-separator&quot;);</span>
+
+<span class="fc" id="L115">        Button btnSave = createSidebarButton(&quot;\uD83D\uDCBE  Зберегти&quot;);</span>
+<span class="fc" id="L116">        btnSave.setOnAction(e -&gt; {</span>
+<span class="nc" id="L117">            logger.info(&quot;Користувач натиснув 'Зберегти'.&quot;);</span>
+<span class="nc" id="L118">            shop.saveCatalogToFile();</span>
+<span class="nc" id="L119">            setStatus(&quot;✅ Усі дані збережено в базі даних SQLite автоматично!&quot;);</span>
+<span class="nc" id="L120">        });</span>
+
+
+<span class="fc" id="L123">        Region spacer = new Region();</span>
+<span class="fc" id="L124">        VBox.setVgrow(spacer, Priority.ALWAYS);</span>
+
+<span class="fc" id="L126">        VBox sidebar = new VBox(0, logoBox, sep1,</span>
+                btnCatalog, btnBouquets, btnSearch,
+                spacer, sep2, btnSave);
+<span class="fc" id="L129">        sidebar.getStyleClass().add(&quot;sidebar&quot;);</span>
+<span class="fc" id="L130">        return sidebar;</span>
+    }
+
+    private Button createSidebarButton(String text) {
+<span class="fc" id="L134">        Button btn = new Button(text);</span>
+<span class="fc" id="L135">        btn.getStyleClass().add(&quot;sidebar-btn&quot;);</span>
+<span class="fc" id="L136">        btn.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="fc" id="L137">        return btn;</span>
+    }
+
+    private void setActiveButton(Button btn) {
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">        if (activeButton != null) {</span>
+<span class="fc" id="L142">            activeButton.getStyleClass().remove(&quot;sidebar-btn-active&quot;);</span>
+        }
+<span class="fc" id="L144">        activeButton = btn;</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">        if (btn != null) {</span>
+<span class="fc" id="L146">            btn.getStyleClass().add(&quot;sidebar-btn-active&quot;);</span>
+        }
+<span class="fc" id="L148">    }</span>
+
+
+
+    private void showCatalog(Button btn) {
+<span class="fc" id="L153">        logger.info(&quot;Навігація: перехід до панелі 'Каталог'.&quot;);</span>
+<span class="fc" id="L154">        catalogPane.refresh();</span>
+<span class="fc" id="L155">        contentArea.getChildren().setAll(catalogPane);</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">        if (btn != null) setActiveButton(btn);</span>
+<span class="fc" id="L157">    }</span>
+
+    private void showBouquets(Button btn) {
+<span class="fc" id="L160">        logger.info(&quot;Навігація: перехід до панелі 'Букети'.&quot;);</span>
+<span class="fc" id="L161">        bouquetPane.refresh();</span>
+<span class="fc" id="L162">        contentArea.getChildren().setAll(bouquetPane);</span>
+<span class="fc" id="L163">        setActiveButton(btn);</span>
+<span class="fc" id="L164">    }</span>
+
+    private void showSearch(Button btn) {
+<span class="fc" id="L167">        logger.info(&quot;Навігація: перехід до панелі 'Пошук'.&quot;);</span>
+<span class="fc" id="L168">        searchPane.refresh();</span>
+<span class="fc" id="L169">        contentArea.getChildren().setAll(searchPane);</span>
+<span class="fc" id="L170">        setActiveButton(btn);</span>
+<span class="fc" id="L171">    }</span>
+
+
+
+    private HBox createStatusBar() {
+<span class="fc" id="L176">        statusLabel = new Label(&quot;Ласкаво просимо до Квіткового Магазину! \uD83C\uDF3B&quot;);</span>
+<span class="fc" id="L177">        statusLabel.getStyleClass().add(&quot;status-label&quot;);</span>
+
+<span class="fc" id="L179">        HBox bar = new HBox(statusLabel);</span>
+<span class="fc" id="L180">        bar.getStyleClass().add(&quot;status-bar&quot;);</span>
+<span class="fc" id="L181">        bar.setAlignment(Pos.CENTER_LEFT);</span>
+<span class="fc" id="L182">        return bar;</span>
+    }
+
+    private void setStatus(String message) {
+<span class="fc" id="L186">        statusLabel.setText(message);</span>
+<span class="fc" id="L187">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

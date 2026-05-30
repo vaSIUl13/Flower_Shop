@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FlowerShop.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">services</a> &gt; <span class="el_source">FlowerShop.java</span></div><h1>FlowerShop.java</h1><pre class="source lang-java linenums">package services;
+
+import database.DatabaseManager;
+import flowers.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class FlowerShop {
+<span class="fc" id="L14">    private static final Logger logger = LogManager.getLogger(FlowerShop.class);</span>
+
+    private final DatabaseManager db;
+<span class="fc" id="L17">    private List&lt;Flower&gt; catalog = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L18">    private List&lt;Bouquet&gt; bouquets = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L19">    private final Scanner scanner = new Scanner(System.in);</span>
+
+<span class="fc" id="L21">    public FlowerShop() {</span>
+<span class="fc" id="L22">        db = new DatabaseManager();</span>
+<span class="fc" id="L23">        loadFromDatabase();</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">        if (catalog.isEmpty()) {</span>
+<span class="nc" id="L25">            initRichCatalog();</span>
+        }
+<span class="fc" id="L27">    }</span>
+
+    private void loadFromDatabase() {
+<span class="fc" id="L30">        catalog = db.getAllFlowers();</span>
+<span class="fc" id="L31">        bouquets = db.getAllBouquetsWithContents();</span>
+<span class="fc" id="L32">        logger.info(&quot;Завантажено з БД: квітів=&quot; + catalog.size() + &quot;, букетів=&quot; + bouquets.size());</span>
+<span class="fc" id="L33">    }</span>
+
+    private void initRichCatalog() {
+<span class="nc" id="L36">        LocalDate today = LocalDate.now();</span>
+
+
+<span class="nc" id="L39">        addFlowerSilent(new Rose(&quot;Троянда Гран-Прі&quot;, 80, 60, &quot;Червоний&quot;, today, true, &quot;Келих&quot;));</span>
+<span class="nc" id="L40">        addFlowerSilent(new Rose(&quot;Троянда Фрідом&quot;, 95, 65, &quot;Бордовий&quot;, today, true, &quot;Класичний&quot;));</span>
+<span class="nc" id="L41">        addFlowerSilent(new Rose(&quot;Троянда Аваланч&quot;, 90, 55, &quot;Білий&quot;, today.minusDays(1), false, &quot;Півонієвидний&quot;));</span>
+<span class="nc" id="L42">        addFlowerSilent(new Rose(&quot;Троянда Мондіаль&quot;, 85, 50, &quot;Кремовий&quot;, today, false, &quot;Келих&quot;));</span>
+<span class="nc" id="L43">        addFlowerSilent(new Rose(&quot;Троянда Пінк Флойд&quot;, 88, 55, &quot;Рожевий&quot;, today, true, &quot;Бокаловидний&quot;));</span>
+
+
+<span class="nc" id="L46">        addFlowerSilent(new Tulip(&quot;Тюльпан Голд Парад&quot;, 40, 35, &quot;Жовтий&quot;, today, &quot;Овальна&quot;, false));</span>
+<span class="nc" id="L47">        addFlowerSilent(new Tulip(&quot;Тюльпан Ред Імпрешн&quot;, 45, 40, &quot;Червоний&quot;, today, &quot;Витягнута&quot;, false));</span>
+<span class="nc" id="L48">        addFlowerSilent(new Tulip(&quot;Тюльпан Перпл Прінс&quot;, 50, 38, &quot;Фіолетовий&quot;, today.minusDays(1), &quot;Округла&quot;, true));</span>
+<span class="nc" id="L49">        addFlowerSilent(new Tulip(&quot;Тюльпан Уайт Дрім&quot;, 42, 36, &quot;Білий&quot;, today, &quot;Овальна&quot;, false));</span>
+
+
+<span class="nc" id="L52">        addFlowerSilent(new Chamomile(&quot;Ромашка Польова&quot;, 25, 25, &quot;Білий&quot;, today.minusDays(1), 1.5, 18));</span>
+<span class="nc" id="L53">        addFlowerSilent(new Chamomile(&quot;Ромашка Садова&quot;, 30, 35, &quot;Білий&quot;, today, 2.0, 24));</span>
+<span class="nc" id="L54">        addFlowerSilent(new Chamomile(&quot;Ромашка Гігантська&quot;, 35, 45, &quot;Білий&quot;, today, 3.0, 30));</span>
+
+
+<span class="nc" id="L57">        addFlowerSilent(new Lily(&quot;Лілія Касабланка&quot;, 120, 70, &quot;Білий&quot;, today, &quot;Інтенсивний&quot;, 6));</span>
+<span class="nc" id="L58">        addFlowerSilent(new Lily(&quot;Лілія Стар Гейзер&quot;, 130, 75, &quot;Рожевий&quot;, today, &quot;Солодкий&quot;, 6));</span>
+<span class="nc" id="L59">        addFlowerSilent(new Lily(&quot;Лілія Азіатська&quot;, 95, 60, &quot;Помаранчевий&quot;, today.minusDays(1), &quot;Легкий&quot;, 6));</span>
+<span class="nc" id="L60">        addFlowerSilent(new Lily(&quot;Лілія Тигрова&quot;, 85, 55, &quot;Помаранчевий&quot;, today, &quot;Ніжний&quot;, 6));</span>
+
+
+<span class="nc" id="L63">        addFlowerSilent(new Peony(&quot;Півонія Сара Бернар&quot;, 150, 50, &quot;Рожевий&quot;, today, &quot;Відкритий&quot;, true));</span>
+<span class="nc" id="L64">        addFlowerSilent(new Peony(&quot;Півонія Фестіва Максіма&quot;, 160, 55, &quot;Білий&quot;, today, &quot;Напіввідкритий&quot;, true));</span>
+<span class="nc" id="L65">        addFlowerSilent(new Peony(&quot;Півонія Ред Чарм&quot;, 155, 48, &quot;Червоний&quot;, today.minusDays(1), &quot;Бутон&quot;, true));</span>
+
+
+<span class="nc" id="L68">        addFlowerSilent(new Orchid(&quot;Орхідея Фаленопсіс&quot;, 200, 45, &quot;Білий&quot;, today, &quot;Фаленопсіс&quot;, true));</span>
+<span class="nc" id="L69">        addFlowerSilent(new Orchid(&quot;Орхідея Дендробіум&quot;, 180, 50, &quot;Фіолетовий&quot;, today, &quot;Дендробіум&quot;, true));</span>
+<span class="nc" id="L70">        addFlowerSilent(new Orchid(&quot;Орхідея Цимбідіум&quot;, 220, 60, &quot;Жовтий&quot;, today, &quot;Цимбідіум&quot;, false));</span>
+
+<span class="nc" id="L72">        logger.info(&quot;Ініціалізовано багатий каталог: &quot; + catalog.size() + &quot; квітів.&quot;);</span>
+<span class="nc" id="L73">    }</span>
+
+    private void addFlowerSilent(Flower flower) {
+<span class="nc" id="L76">        db.insertFlower(flower);</span>
+<span class="nc" id="L77">        catalog.add(flower);</span>
+<span class="nc" id="L78">    }</span>
+
+
+
+    public void viewCatalog() {
+<span class="fc" id="L83">        System.out.println(&quot;=== Каталог квітів ===&quot;);</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        if (catalog.isEmpty()) {</span>
+<span class="nc" id="L85">            System.out.println(&quot;Каталог порожній.&quot;);</span>
+        } else {
+<span class="fc bfc" id="L87" title="All 2 branches covered.">            for (int i = 0; i &lt; catalog.size(); i++) {</span>
+<span class="fc" id="L88">                System.out.println((i + 1) + &quot;. &quot; + catalog.get(i));</span>
+            }
+        }
+<span class="fc" id="L91">    }</span>
+
+    public void addFlowerToCatalog() {
+<span class="fc" id="L94">        System.out.println(&quot;Оберіть тип: 1.Троянда 2.Тюльпан 3.Ромашка 4.Лілія 5.Півонія 6.Орхідея&quot;);</span>
+<span class="fc" id="L95">        int type = readInt(&quot;Тип: &quot;);</span>
+<span class="fc" id="L96">        String name = readString(&quot;Назва: &quot;);</span>
+<span class="fc" id="L97">        double price = readDouble(&quot;Ціна: &quot;);</span>
+<span class="fc" id="L98">        double length = readDouble(&quot;Стебло: &quot;);</span>
+<span class="fc" id="L99">        String color = readString(&quot;Колір: &quot;);</span>
+
+<span class="fc bfc" id="L101" title="All 7 branches covered.">        Flower flower = switch (type) {</span>
+<span class="fc" id="L102">            case 1 -&gt; new Rose(name, price, length, color, LocalDate.now(), true, &quot;Келих&quot;);</span>
+<span class="fc" id="L103">            case 2 -&gt; new Tulip(name, price, length, color, LocalDate.now(), &quot;Овальна&quot;, false);</span>
+<span class="fc" id="L104">            case 3 -&gt; new Chamomile(name, price, length, color, LocalDate.now(), 1.5, 18);</span>
+<span class="fc" id="L105">            case 4 -&gt; new Lily(name, price, length, color, LocalDate.now(), &quot;Легкий&quot;, 6);</span>
+<span class="fc" id="L106">            case 5 -&gt; new Peony(name, price, length, color, LocalDate.now(), &quot;Відкритий&quot;, true);</span>
+<span class="fc" id="L107">            case 6 -&gt; new Orchid(name, price, length, color, LocalDate.now(), &quot;Фаленопсіс&quot;, true);</span>
+<span class="fc" id="L108">            default -&gt; new Rose(name, price, length, color, LocalDate.now(), true, &quot;Келих&quot;);</span>
+<span class="fc" id="L109">        };</span>
+<span class="fc" id="L110">        addFlower(flower);</span>
+<span class="fc" id="L111">        System.out.println(&quot;Квітку додано.&quot;);</span>
+<span class="fc" id="L112">    }</span>
+
+    public void createBouquet() {
+<span class="fc" id="L115">        String name = readString(&quot;Назва букету: &quot;);</span>
+<span class="fc" id="L116">        createNewBouquet(name);</span>
+<span class="fc" id="L117">        System.out.println(&quot;Букет створено.&quot;);</span>
+<span class="fc" id="L118">    }</span>
+
+    public void editBouquet() {
+<span class="fc bfc" id="L121" title="All 2 branches covered.">        if (bouquets.isEmpty()) { System.out.println(&quot;Немає букетів.&quot;); return; }</span>
+<span class="fc bfc" id="L122" title="All 2 branches covered.">        for (int i = 0; i &lt; bouquets.size(); i++)</span>
+<span class="fc" id="L123">            System.out.println((i + 1) + &quot;. &quot; + bouquets.get(i).getName());</span>
+<span class="fc" id="L124">        int bi = readInt(&quot;Номер: &quot;) - 1;</span>
+<span class="pc bpc" id="L125" title="2 of 4 branches missed.">        if (bi &lt; 0 || bi &gt;= bouquets.size()) return;</span>
+<span class="fc" id="L126">        Bouquet b = bouquets.get(bi);</span>
+
+<span class="fc" id="L128">        boolean adding = true;</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">        while (adding) {</span>
+<span class="fc" id="L130">            viewCatalog();</span>
+<span class="fc" id="L131">            System.out.println(&quot;0 -&gt; Завершити&quot;);</span>
+<span class="fc" id="L132">            int fi = readInt(&quot;Квітка: &quot;);</span>
+<span class="fc bfc" id="L133" title="All 2 branches covered.">            if (fi == 0) adding = false;</span>
+<span class="pc bpc" id="L134" title="2 of 4 branches missed.">            else if (fi &gt; 0 &amp;&amp; fi &lt;= catalog.size()) {</span>
+<span class="fc" id="L135">                int qty = readInt(&quot;Кількість: &quot;);</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">                for (int k = 0; k &lt; qty; k++) addFlowerToBouquet(b, catalog.get(fi - 1));</span>
+            }
+<span class="fc" id="L138">        }</span>
+        while (true) {
+<span class="fc" id="L140">            System.out.println(&quot;1.Аксесуар 0.Вихід&quot;);</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">            if (readInt(&quot;&quot;) == 0) break;</span>
+<span class="fc" id="L142">            addAccessoryToBouquet(b, new Accessory(readString(&quot;Назва: &quot;), readDouble(&quot;Ціна: &quot;)));</span>
+        }
+<span class="fc" id="L144">    }</span>
+
+    public void viewAllBouquets() {
+<span class="fc bfc" id="L147" title="All 2 branches covered.">        for (Bouquet b : bouquets) {</span>
+<span class="fc" id="L148">            System.out.println(b);</span>
+<span class="fc" id="L149">            b.getFlowers().forEach(f -&gt; System.out.println(&quot; - &quot; + f));</span>
+<span class="fc" id="L150">            b.getAccessories().forEach(a -&gt; System.out.println(&quot; + &quot; + a));</span>
+<span class="fc" id="L151">        }</span>
+<span class="fc" id="L152">    }</span>
+
+    public void sortBouquet() {
+<span class="fc bfc" id="L155" title="All 2 branches covered.">        if (bouquets.isEmpty()) return;</span>
+<span class="fc" id="L156">        int idx = readInt(&quot;Букет (1-&quot; + bouquets.size() + &quot;): &quot;) - 1;</span>
+<span class="pc bpc" id="L157" title="2 of 4 branches missed.">        if (idx &gt;= 0 &amp;&amp; idx &lt; bouquets.size()) {</span>
+<span class="fc" id="L158">            bouquets.get(idx).sortFlowersByFreshness();</span>
+<span class="fc" id="L159">            System.out.println(&quot;Відсортовано.&quot;);</span>
+        }
+<span class="fc" id="L161">    }</span>
+
+    public void saveCatalogToFile() {
+<span class="fc" id="L164">        logger.info(&quot;Дані зберігаються у БД автоматично.&quot;);</span>
+<span class="fc" id="L165">    }</span>
+
+
+
+<span class="fc" id="L169">    public List&lt;Flower&gt; getCatalog() { return catalog; }</span>
+<span class="fc" id="L170">    public List&lt;Bouquet&gt; getBouquets() { return bouquets; }</span>
+
+    public void addFlower(Flower flower) {
+<span class="fc" id="L173">        db.insertFlower(flower);</span>
+<span class="fc" id="L174">        catalog.add(flower);</span>
+<span class="fc" id="L175">        logger.info(&quot;Додано квітку: &quot; + flower.getName());</span>
+<span class="fc" id="L176">    }</span>
+
+    public void removeFlower(int index) {
+<span class="fc bfc" id="L179" title="All 4 branches covered.">        if (index &gt;= 0 &amp;&amp; index &lt; catalog.size()) {</span>
+<span class="fc" id="L180">            Flower f = catalog.remove(index);</span>
+<span class="fc" id="L181">            db.deleteFlower(f.getId());</span>
+<span class="fc" id="L182">            logger.info(&quot;Видалено квітку: &quot; + f.getName());</span>
+        }
+<span class="fc" id="L184">    }</span>
+
+    public Bouquet createNewBouquet(String name) {
+<span class="fc" id="L187">        Bouquet b = new Bouquet(name);</span>
+<span class="fc" id="L188">        db.insertBouquet(b);</span>
+<span class="fc" id="L189">        bouquets.add(b);</span>
+<span class="fc" id="L190">        logger.info(&quot;Створено букет: &quot; + name);</span>
+<span class="fc" id="L191">        return b;</span>
+    }
+
+    public void removeBouquet(int index) {
+<span class="fc bfc" id="L195" title="All 4 branches covered.">        if (index &gt;= 0 &amp;&amp; index &lt; bouquets.size()) {</span>
+<span class="fc" id="L196">            Bouquet b = bouquets.remove(index);</span>
+<span class="fc" id="L197">            db.deleteBouquet(b.getId());</span>
+<span class="fc" id="L198">            logger.info(&quot;Видалено букет: &quot; + b.getName());</span>
+        }
+<span class="fc" id="L200">    }</span>
+
+    public void renameBouquet(Bouquet bouquet, String newName) {
+<span class="fc" id="L203">        String oldName = bouquet.getName();</span>
+<span class="fc" id="L204">        bouquet.setName(newName);</span>
+<span class="fc" id="L205">        db.updateBouquetName(bouquet.getId(), newName);</span>
+<span class="fc" id="L206">        logger.info(&quot;Перейменовано букет: \&quot;&quot; + oldName + &quot;\&quot; → \&quot;&quot; + newName + &quot;\&quot;&quot;);</span>
+<span class="fc" id="L207">    }</span>
+
+    public void addFlowerToBouquet(Bouquet bouquet, Flower flower) {
+<span class="fc" id="L210">        db.addFlowerToBouquet(bouquet.getId(), flower.getId());</span>
+<span class="fc" id="L211">        bouquet.addFlower(flower);</span>
+<span class="fc" id="L212">        logger.info(&quot;Додано \&quot;&quot; + flower.getName() + &quot;\&quot; → \&quot;&quot; + bouquet.getName() + &quot;\&quot;&quot;);</span>
+<span class="fc" id="L213">    }</span>
+
+    public void removeFlowerFromBouquet(Bouquet bouquet, int idx) {
+<span class="fc bfc" id="L216" title="All 4 branches covered.">        if (idx &gt;= 0 &amp;&amp; idx &lt; bouquet.getFlowers().size()) {</span>
+<span class="fc" id="L217">            Flower f = bouquet.getFlowers().get(idx);</span>
+<span class="fc" id="L218">            db.removeOneFlowerFromBouquet(bouquet.getId(), f.getId());</span>
+<span class="fc" id="L219">            bouquet.removeFlower(idx);</span>
+        }
+<span class="fc" id="L221">    }</span>
+
+    public void addAccessoryToBouquet(Bouquet bouquet, Accessory acc) {
+<span class="fc" id="L224">        db.insertAccessory(bouquet.getId(), acc);</span>
+<span class="fc" id="L225">        bouquet.addAccessory(acc);</span>
+<span class="fc" id="L226">        logger.info(&quot;Додано аксесуар \&quot;&quot; + acc.getName() + &quot;\&quot; → \&quot;&quot; + bouquet.getName() + &quot;\&quot;&quot;);</span>
+<span class="fc" id="L227">    }</span>
+
+    public void removeAccessoryFromBouquet(Bouquet bouquet, int idx) {
+<span class="fc bfc" id="L230" title="All 4 branches covered.">        if (idx &gt;= 0 &amp;&amp; idx &lt; bouquet.getAccessories().size()) {</span>
+<span class="fc" id="L231">            Accessory a = bouquet.getAccessories().get(idx);</span>
+<span class="fc" id="L232">            db.deleteAccessory(a.getId());</span>
+<span class="fc" id="L233">            bouquet.removeAccessory(idx);</span>
+        }
+<span class="fc" id="L235">    }</span>
+
+
+
+    private int readInt(String p) {
+<span class="fc" id="L240">        System.out.print(p);</span>
+<span class="fc bfc" id="L241" title="All 2 branches covered.">        while (!scanner.hasNextInt()) scanner.next();</span>
+<span class="fc" id="L242">        int r = scanner.nextInt(); scanner.nextLine(); return r;</span>
+    }
+    private double readDouble(String p) {
+<span class="fc" id="L245">        System.out.print(p);</span>
+<span class="fc bfc" id="L246" title="All 2 branches covered.">        while (!scanner.hasNextDouble()) scanner.next();</span>
+<span class="fc" id="L247">        double r = scanner.nextDouble(); scanner.nextLine(); return r;</span>
+    }
+    private String readString(String p) {
+<span class="fc" id="L250">        System.out.print(p);</span>
+<span class="fc" id="L251">        return scanner.nextLine();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

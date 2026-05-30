@@ -15,7 +15,14 @@ import static org.testfx.api.FxAssert.verifyThat;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class FlowerShopAppTest {
 
+    private static final String TEST_DB = "test_flower_shop_ui.db";
     private FlowerShopApp app;
+
+    @BeforeAll
+    static void initAll() {
+        System.setProperty("test.db.url", "jdbc:sqlite:" + TEST_DB);
+        new java.io.File(TEST_DB).delete();
+    }
 
     @Start
     private void start(Stage stage) {
@@ -62,7 +69,7 @@ class FlowerShopAppTest {
         robot.clickOn("＋  Додати квітку");
 
         DialogPane dialogPane = robot.lookup(".dialog-pane").queryAs(DialogPane.class);
-        
+
         TextField nameField = robot.from(dialogPane).lookup(".text-field").nth(0).queryAs(TextField.class);
         TextField priceField = robot.from(dialogPane).lookup(".text-field").nth(1).queryAs(TextField.class);
         TextField stemField = robot.from(dialogPane).lookup(".text-field").nth(2).queryAs(TextField.class);
@@ -82,11 +89,11 @@ class FlowerShopAppTest {
         TableView<?> table = robot.lookup(".table-view").queryAs(TableView.class);
 
         TextField searchField = robot.lookup(".search-field").queryAs(TextField.class);
-        
+
         robot.clickOn(searchField).write("Тестова Троянда");
 
         assertTrue(table.getItems().size() > 0);
-        
+
         robot.clickOn(searchField).eraseText(15);
     }
 
@@ -122,7 +129,6 @@ class FlowerShopAppTest {
     }
 
 
-
     @Test
     @Order(20)
     void testCreateBouquet(FxRobot robot) {
@@ -144,7 +150,7 @@ class FlowerShopAppTest {
         robot.clickOn("💐  Букети");
         @SuppressWarnings("unchecked")
         ListView<String> list = (ListView<String>) robot.lookup(".list-view").queryAs(ListView.class);
-        
+
         robot.interact(() -> {
             list.getSelectionModel().select("GUI Букет");
         });
@@ -163,12 +169,12 @@ class FlowerShopAppTest {
         robot.clickOn("💐  Букети");
         @SuppressWarnings("unchecked")
         ListView<String> list = (ListView<String>) robot.lookup(".list-view").queryAs(ListView.class);
-        
+
         TextField searchField = robot.lookup(".search-field").queryAs(TextField.class);
         robot.clickOn(searchField).write("Перейменований");
-        
+
         assertEquals(1, list.getItems().size());
-        
+
         robot.clickOn(searchField).eraseText(15);
     }
 
@@ -178,17 +184,16 @@ class FlowerShopAppTest {
         robot.clickOn("💐  Букети");
         @SuppressWarnings("unchecked")
         ListView<String> list = (ListView<String>) robot.lookup(".list-view").queryAs(ListView.class);
-        
+
         robot.interact(() -> {
             list.getSelectionModel().select("Перейменований Букет");
         });
 
         int sizeBefore = list.getItems().size();
         robot.clickOn("🗑  Видалити букет");
-        
+
         assertEquals(sizeBefore - 1, list.getItems().size());
     }
-
 
 
     @Test

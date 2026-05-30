@@ -13,7 +13,8 @@ public class DatabaseManager {
 
     private static final Logger logger = LogManager.getLogger(DatabaseManager.class);
     protected String getDbUrl() {
-        return "jdbc:sqlite:flower_shop.db";
+        String envUrl = System.getProperty("test.db.url");
+        return (envUrl != null) ? envUrl : "jdbc:sqlite:flower_shop.db";
     }
 
     public DatabaseManager() {

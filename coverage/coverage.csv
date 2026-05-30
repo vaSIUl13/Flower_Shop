@@ -1,0 +1,22 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+JaCoCo Coverage Report,default,Main,24,0,0,0,9,0,3,0,3,0
+JaCoCo Coverage Report,flowers,Accessory,0,57,0,4,0,15,0,10,0,8
+JaCoCo Coverage Report,flowers,Flower,0,70,0,0,0,16,0,9,0,9
+JaCoCo Coverage Report,flowers,Rose,0,32,0,2,0,8,0,6,0,5
+JaCoCo Coverage Report,flowers,Orchid,0,28,0,0,0,8,0,5,0,5
+JaCoCo Coverage Report,flowers,Tulip,0,26,0,0,0,8,0,5,0,5
+JaCoCo Coverage Report,flowers,Bouquet,0,136,1,11,0,29,1,21,0,16
+JaCoCo Coverage Report,flowers,Chamomile,0,26,0,0,0,8,0,5,0,5
+JaCoCo Coverage Report,flowers,Lily,0,28,0,0,0,8,0,5,0,5
+JaCoCo Coverage Report,flowers,Peony,0,28,0,0,0,8,0,5,0,5
+JaCoCo Coverage Report,database,DatabaseManager,104,894,26,73,32,214,26,46,0,20
+JaCoCo Coverage Report,ui,BouquetPane,274,1952,33,37,51,284,41,45,12,39
+JaCoCo Coverage Report,ui,BouquetPane.new ListCell() {...},0,71,1,3,0,12,1,3,0,2
+JaCoCo Coverage Report,ui,BouquetPane.new TableCell() {...},0,74,2,4,0,12,2,3,0,2
+JaCoCo Coverage Report,ui,CatalogPane,638,2272,55,53,93,342,58,73,15,57
+JaCoCo Coverage Report,ui,CatalogPane.new TableCell() {...},0,71,1,3,0,15,1,3,0,2
+JaCoCo Coverage Report,ui,FlowerShopApp,28,432,2,4,11,89,5,15,3,14
+JaCoCo Coverage Report,ui,CatalogPane.new ListCell() {...},0,71,1,3,0,15,1,3,0,2
+JaCoCo Coverage Report,ui,SearchPane,177,442,3,7,19,79,7,11,5,8
+JaCoCo Coverage Report,services,FlowerShop,301,633,8,53,30,126,10,51,2,26
+JaCoCo Coverage Report,menu,ConsoleMenu,19,175,1,7,7,34,2,6,1,3

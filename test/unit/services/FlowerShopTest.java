@@ -8,10 +8,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FlowerShopTest {
 
+    private static final String TEST_DB = "test_flower_shop.db";
     private FlowerShop shop;
+
+    @BeforeAll
+    static void initAll() {
+        System.setProperty("test.db.url", "jdbc:sqlite:" + TEST_DB);
+    }
 
     @BeforeEach
     void setUp() {
+        new java.io.File(TEST_DB).delete();
         shop = new FlowerShop();
     }
 

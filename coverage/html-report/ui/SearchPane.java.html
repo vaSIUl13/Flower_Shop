@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SearchPane.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">ui</a> &gt; <span class="el_source">SearchPane.java</span></div><h1>SearchPane.java</h1><pre class="source lang-java linenums">package ui;
+
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import services.FlowerShop;
+import flowers.*;
+
+import java.util.List;
+import java.util.function.Consumer;
+
+public class SearchPane extends VBox {
+
+<span class="fc" id="L19">    private static final Logger logger = LogManager.getLogger(SearchPane.class);</span>
+    private final FlowerShop shop;
+    private final Consumer&lt;String&gt; statusCallback;
+
+    private ComboBox&lt;String&gt; bouquetCombo;
+    private TextField minField;
+    private TextField maxField;
+    private TableView&lt;Flower&gt; resultsTable;
+    private Label resultLabel;
+
+<span class="fc" id="L29">    public SearchPane(FlowerShop shop, Consumer&lt;String&gt; statusCallback) {</span>
+<span class="fc" id="L30">        this.shop = shop;</span>
+<span class="fc" id="L31">        this.statusCallback = statusCallback;</span>
+
+<span class="fc" id="L33">        setSpacing(20);</span>
+<span class="fc" id="L34">        setPadding(new Insets(30));</span>
+<span class="fc" id="L35">        getStyleClass().add(&quot;panel&quot;);</span>
+
+
+<span class="fc" id="L38">        Label title = new Label(&quot;\uD83D\uDD0D  Пошук квітів&quot;);</span>
+<span class="fc" id="L39">        title.getStyleClass().add(&quot;panel-title&quot;);</span>
+<span class="fc" id="L40">        Label subtitle = new Label(&quot;Знайдіть квіти у букеті за довжиною стебла&quot;);</span>
+<span class="fc" id="L41">        subtitle.getStyleClass().add(&quot;panel-subtitle&quot;);</span>
+<span class="fc" id="L42">        VBox header = new VBox(4, title, subtitle);</span>
+
+
+<span class="fc" id="L45">        VBox searchForm = createSearchForm();</span>
+
+
+<span class="fc" id="L48">        VBox resultsBox = createResultsPanel();</span>
+<span class="fc" id="L49">        VBox.setVgrow(resultsBox, Priority.ALWAYS);</span>
+
+<span class="fc" id="L51">        getChildren().addAll(header, searchForm, resultsBox);</span>
+<span class="fc" id="L52">        refresh();</span>
+<span class="fc" id="L53">    }</span>
+
+    private VBox createSearchForm() {
+<span class="fc" id="L56">        bouquetCombo = new ComboBox&lt;&gt;();</span>
+<span class="fc" id="L57">        bouquetCombo.setPromptText(&quot;Оберіть букет...&quot;);</span>
+<span class="fc" id="L58">        bouquetCombo.setMaxWidth(300);</span>
+
+<span class="fc" id="L60">        minField = new TextField();</span>
+<span class="fc" id="L61">        minField.setPromptText(&quot;Мінімум (см)&quot;);</span>
+<span class="fc" id="L62">        minField.setPrefWidth(120);</span>
+
+<span class="fc" id="L64">        maxField = new TextField();</span>
+<span class="fc" id="L65">        maxField.setPromptText(&quot;Максимум (см)&quot;);</span>
+<span class="fc" id="L66">        maxField.setPrefWidth(120);</span>
+
+<span class="fc" id="L68">        Button searchBtn = new Button(&quot;\uD83D\uDD0D  Шукати&quot;);</span>
+<span class="fc" id="L69">        searchBtn.getStyleClass().add(&quot;btn-primary&quot;);</span>
+<span class="fc" id="L70">        searchBtn.setOnAction(e -&gt; performSearch());</span>
+
+<span class="fc" id="L72">        HBox rangeBox = new HBox(10,</span>
+                new Label(&quot;Від:&quot;), minField,
+                new Label(&quot;До:&quot;), maxField,
+                searchBtn
+        );
+<span class="fc" id="L77">        rangeBox.setAlignment(Pos.CENTER_LEFT);</span>
+
+<span class="fc" id="L79">        VBox form = new VBox(12,</span>
+                new Label(&quot;Букет:&quot;), bouquetCombo,
+                new Label(&quot;Діапазон довжини стебла:&quot;), rangeBox
+        );
+<span class="fc" id="L83">        form.getStyleClass().add(&quot;card&quot;);</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        for (javafx.scene.Node child : form.getChildren()) {</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">            if (child instanceof Label) {</span>
+<span class="fc" id="L86">                child.getStyleClass().add(&quot;section-title&quot;);</span>
+            }
+<span class="fc" id="L88">        }</span>
+<span class="fc" id="L89">        return form;</span>
+    }
+
+    private VBox createResultsPanel() {
+<span class="fc" id="L93">        resultLabel = new Label(&quot;Результати пошуку:&quot;);</span>
+<span class="fc" id="L94">        resultLabel.getStyleClass().add(&quot;section-title&quot;);</span>
+
+<span class="fc" id="L96">        resultsTable = new TableView&lt;&gt;();</span>
+<span class="fc" id="L97">        resultsTable.setPlaceholder(new Label(&quot;Виконайте пошук для відображення результатів&quot;));</span>
+<span class="fc" id="L98">        VBox.setVgrow(resultsTable, Priority.ALWAYS);</span>
+
+<span class="fc" id="L100">        TableColumn&lt;Flower, String&gt; nameCol = new TableColumn&lt;&gt;(&quot;Назва&quot;);</span>
+<span class="pc" id="L101">        nameCol.setCellValueFactory(d -&gt; new SimpleStringProperty(d.getValue().getName()));</span>
+<span class="fc" id="L102">        nameCol.setPrefWidth(180);</span>
+
+<span class="fc" id="L104">        TableColumn&lt;Flower, String&gt; typeCol = new TableColumn&lt;&gt;(&quot;Тип&quot;);</span>
+<span class="pc" id="L105">        typeCol.setCellValueFactory(d -&gt; new SimpleStringProperty(d.getValue().getTypeName()));</span>
+<span class="fc" id="L106">        typeCol.setPrefWidth(100);</span>
+
+<span class="fc" id="L108">        TableColumn&lt;Flower, String&gt; priceCol = new TableColumn&lt;&gt;(&quot;Ціна (грн)&quot;);</span>
+<span class="pc" id="L109">        priceCol.setCellValueFactory(d -&gt; new SimpleStringProperty(String.format(&quot;%.2f&quot;, d.getValue().getPrice())));</span>
+<span class="fc" id="L110">        priceCol.setPrefWidth(100);</span>
+
+<span class="fc" id="L112">        TableColumn&lt;Flower, String&gt; stemCol = new TableColumn&lt;&gt;(&quot;Стебло (см)&quot;);</span>
+<span class="pc" id="L113">        stemCol.setCellValueFactory(d -&gt; new SimpleStringProperty(String.format(&quot;%.1f&quot;, d.getValue().getStemLength())));</span>
+<span class="fc" id="L114">        stemCol.setPrefWidth(100);</span>
+
+<span class="fc" id="L116">        TableColumn&lt;Flower, String&gt; colorCol = new TableColumn&lt;&gt;(&quot;Колір&quot;);</span>
+<span class="pc" id="L117">        colorCol.setCellValueFactory(d -&gt; new SimpleStringProperty(d.getValue().getColor()));</span>
+<span class="fc" id="L118">        colorCol.setPrefWidth(100);</span>
+
+<span class="fc" id="L120">        resultsTable.getColumns().addAll(nameCol, typeCol, priceCol, stemCol, colorCol);</span>
+<span class="fc" id="L121">        resultsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);</span>
+
+<span class="fc" id="L123">        VBox box = new VBox(10, resultLabel, resultsTable);</span>
+<span class="fc" id="L124">        box.getStyleClass().add(&quot;card&quot;);</span>
+<span class="fc" id="L125">        VBox.setVgrow(resultsTable, Priority.ALWAYS);</span>
+<span class="fc" id="L126">        return box;</span>
+    }
+
+    private void performSearch() {
+<span class="fc" id="L130">        int idx = bouquetCombo.getSelectionModel().getSelectedIndex();</span>
+<span class="pc bpc" id="L131" title="1 of 2 branches missed.">        if (idx &lt; 0) {</span>
+<span class="fc" id="L132">            showWarning(&quot;Спочатку оберіть букет!&quot;);</span>
+<span class="fc" id="L133">            return;</span>
+        }
+
+        double min, max;
+        try {
+<span class="nc" id="L138">            min = Double.parseDouble(minField.getText().trim());</span>
+<span class="nc" id="L139">            max = Double.parseDouble(maxField.getText().trim());</span>
+<span class="nc" id="L140">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L141">            logger.warn(&quot;Некоректні числові значення для пошуку: min='&quot; + minField.getText() + &quot;', max='&quot; + maxField.getText() + &quot;'&quot;);</span>
+<span class="nc" id="L142">            showWarning(&quot;Введіть коректні числові значення для діапазону!&quot;);</span>
+<span class="nc" id="L143">            return;</span>
+<span class="nc" id="L144">        }</span>
+
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if (min &gt; max) {</span>
+<span class="nc" id="L147">            showWarning(&quot;Мінімум не може бути більшим за максимум!&quot;);</span>
+<span class="nc" id="L148">            return;</span>
+        }
+
+<span class="nc" id="L151">        Bouquet b = shop.getBouquets().get(idx);</span>
+<span class="nc" id="L152">        List&lt;Flower&gt; found = b.findFlowersByStemLength(min, max);</span>
+
+<span class="nc" id="L154">        resultsTable.setItems(FXCollections.observableArrayList(found));</span>
+<span class="nc" id="L155">        resultLabel.setText(String.format(&quot;Знайдено %d квіт(ів) у букеті \&quot;%s\&quot; зі стеблом від %.1f до %.1f см:&quot;,</span>
+<span class="nc" id="L156">                found.size(), b.getName(), min, max));</span>
+<span class="nc" id="L157">        logger.info(String.format(&quot;Пошук: знайдено %d квіт(ів) у букеті '%s' (стебло: %.1f–%.1f см).&quot;,</span>
+<span class="nc" id="L158">                found.size(), b.getName(), min, max));</span>
+<span class="nc" id="L159">        statusCallback.accept(String.format(&quot;🔍 Знайдено %d квіт(ів)&quot;, found.size()));</span>
+<span class="nc" id="L160">    }</span>
+
+    private void showWarning(String msg) {
+<span class="fc" id="L163">        Alert alert = new Alert(Alert.AlertType.WARNING, msg, ButtonType.OK);</span>
+<span class="fc" id="L164">        alert.setTitle(&quot;Увага&quot;);</span>
+<span class="fc" id="L165">        alert.setHeaderText(null);</span>
+<span class="fc" id="L166">        alert.showAndWait();</span>
+<span class="fc" id="L167">    }</span>
+
+    public void refresh() {
+<span class="fc" id="L170">        bouquetCombo.getItems().clear();</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">        for (Bouquet b : shop.getBouquets()) {</span>
+<span class="fc" id="L172">            bouquetCombo.getItems().add(b.getName());</span>
+<span class="fc" id="L173">        }</span>
+<span class="fc" id="L174">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

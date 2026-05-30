@@ -7,10 +7,6 @@ import java.time.LocalDate;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Тести для класу DatabaseManager.
- * Використовує окрему тестову БД, яка видаляється після кожного тесту.
- */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class DatabaseManagerTest {
 
@@ -19,7 +15,6 @@ class DatabaseManagerTest {
 
     @BeforeEach
     void setUp() {
-        // Видалити стару тестову БД перед кожним тестом
         new File(TEST_DB).delete();
         db = new TestDatabaseManager();
     }
@@ -29,7 +24,6 @@ class DatabaseManagerTest {
         new File(TEST_DB).delete();
     }
 
-    // Підклас для тестування з іншою БД
     static class TestDatabaseManager extends DatabaseManager {
         @Override
         protected String getDbUrl() {
@@ -37,7 +31,7 @@ class DatabaseManagerTest {
         }
     }
 
-    // ==================== ТЕСТИ КВІТІВ ====================
+
 
     @Test
     void testInsertAndGetRose() {
@@ -132,7 +126,7 @@ class DatabaseManagerTest {
         assertFalse(found, "Квітка повинна бути видалена");
     }
 
-    // ==================== ТЕСТИ БУКЕТІВ ====================
+
 
     @Test
     void testInsertAndGetBouquet() {
@@ -176,7 +170,7 @@ class DatabaseManagerTest {
         assertEquals("Нова Назва", loaded.getName());
     }
 
-    // ==================== ТЕСТИ ЗВ'ЯЗКІВ БУКЕТ-КВІТКА ====================
+
 
     @Test
     void testAddFlowerToBouquet() {
@@ -220,7 +214,7 @@ class DatabaseManagerTest {
         assertTrue(loaded.getFlowers().isEmpty());
     }
 
-    // ==================== ТЕСТИ АКСЕСУАРІВ ====================
+
 
     @Test
     void testInsertAndLoadAccessory() {
@@ -280,11 +274,10 @@ class DatabaseManagerTest {
         assertTrue(loaded.getAccessories().isEmpty());
     }
 
-    // ==================== ТЕСТИ ІНІЦІАЛІЗАЦІЇ ====================
+
 
     @Test
     void testInitDatabaseCreatesTablesIdempotent() {
-        // Виклик initDatabase() повторно не повинен створювати помилок
         assertDoesNotThrow(() -> db.initDatabase());
     }
 
@@ -292,7 +285,6 @@ class DatabaseManagerTest {
     void testGetAllFlowersEmptyDatabase() {
         List<Flower> flowers = db.getAllFlowers();
         assertNotNull(flowers);
-        // В існуючій БД можуть бути квіти — просто перевіряємо що не null
     }
 
     @Test
@@ -301,7 +293,7 @@ class DatabaseManagerTest {
         assertNotNull(bouquets);
     }
 
-    // ==================== ТЕСТИ СПЕЦІАЛЬНИХ ПОЛІВ ====================
+
 
     @Test
     void testRoseSpecificFieldsPersisted() {

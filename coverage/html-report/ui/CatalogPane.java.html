@@ -1,0 +1,728 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CatalogPane.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">ui</a> &gt; <span class="el_source">CatalogPane.java</span></div><h1>CatalogPane.java</h1><pre class="source lang-java linenums">package ui;
+
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import services.FlowerShop;
+import flowers.*;
+
+import java.time.LocalDate;
+import java.util.*;
+import java.util.function.Consumer;
+
+public class CatalogPane extends VBox {
+
+<span class="fc" id="L24">    private static final Logger logger = LogManager.getLogger(CatalogPane.class);</span>
+    private final FlowerShop shop;
+    private final Consumer&lt;String&gt; statusCallback;
+    private TableView&lt;Flower&gt; table;
+
+    private ObservableList&lt;Flower&gt; allFlowers;
+    private FilteredList&lt;Flower&gt; filteredFlowers;
+
+    private TextField nameSearchField;
+<span class="fc" id="L33">    private final Map&lt;String, CheckBox&gt; typeCheckboxes = new LinkedHashMap&lt;&gt;();</span>
+    private TextField priceMinField;
+    private TextField priceMaxField;
+    private TextField stemMinField;
+    private TextField stemMaxField;
+<span class="fc" id="L38">    private final Map&lt;String, CheckBox&gt; colorCheckboxes = new LinkedHashMap&lt;&gt;();</span>
+    private Label resultsCountLabel;
+
+<span class="fc" id="L41">    private static final String[][] COLORS = {</span>
+            {&quot;Червоний&quot;, &quot;#E53935&quot;},
+            {&quot;Рожевий&quot;, &quot;#EC407A&quot;},
+            {&quot;Білий&quot;, &quot;#FAFAFA&quot;},
+            {&quot;Жовтий&quot;, &quot;#FDD835&quot;},
+            {&quot;Помаранчевий&quot;, &quot;#FB8C00&quot;},
+            {&quot;Фіолетовий&quot;, &quot;#8E24AA&quot;},
+            {&quot;Синій&quot;, &quot;#1E88E5&quot;},
+            {&quot;Бірюзовий&quot;, &quot;#26A69A&quot;},
+            {&quot;Кремовий&quot;, &quot;#FFF8E1&quot;},
+            {&quot;Бордовий&quot;, &quot;#880E4F&quot;},
+            {&quot;Лавандовий&quot;, &quot;#B39DDB&quot;},
+            {&quot;Персиковий&quot;, &quot;#FFAB91&quot;},
+            {&quot;Коралловий&quot;, &quot;#FF7043&quot;},
+    };
+
+<span class="fc" id="L57">    private static final String[] FLOWER_TYPES = {</span>
+            &quot;Троянда&quot;, &quot;Тюльпан&quot;, &quot;Ромашка&quot;, &quot;Лілія&quot;, &quot;Півонія&quot;, &quot;Орхідея&quot;
+    };
+
+<span class="fc" id="L61">    private static final String[] FLOWER_TYPE_EMOJIS = {</span>
+            &quot;🌹&quot;, &quot;🌷&quot;, &quot;🌼&quot;, &quot;🌺&quot;, &quot;🌸&quot;, &quot;🪷&quot;
+    };
+
+<span class="fc" id="L65">    public CatalogPane(FlowerShop shop, Consumer&lt;String&gt; statusCallback) {</span>
+<span class="fc" id="L66">        this.shop = shop;</span>
+<span class="fc" id="L67">        this.statusCallback = statusCallback;</span>
+
+<span class="fc" id="L69">        setSpacing(20);</span>
+<span class="fc" id="L70">        setPadding(new Insets(30));</span>
+<span class="fc" id="L71">        getStyleClass().add(&quot;panel&quot;);</span>
+
+<span class="fc" id="L73">        Label title = new Label(&quot;\uD83C\uDF39  Каталог квітів&quot;);</span>
+<span class="fc" id="L74">        title.getStyleClass().add(&quot;panel-title&quot;);</span>
+<span class="fc" id="L75">        Label subtitle = new Label(&quot;Асортимент із &quot; + shop.getCatalog().size() + &quot; квітів • 6 видів&quot;);</span>
+<span class="fc" id="L76">        subtitle.getStyleClass().add(&quot;panel-subtitle&quot;);</span>
+<span class="fc" id="L77">        VBox header = new VBox(4, title, subtitle);</span>
+
+<span class="fc" id="L79">        HBox content = createContent();</span>
+<span class="fc" id="L80">        VBox.setVgrow(content, Priority.ALWAYS);</span>
+
+<span class="fc" id="L82">        getChildren().addAll(header, content);</span>
+<span class="fc" id="L83">        refresh();</span>
+<span class="fc" id="L84">    }</span>
+
+    private HBox createContent() {
+<span class="fc" id="L87">        VBox filterPanel = createFilterPanel();</span>
+<span class="fc" id="L88">        filterPanel.setMinWidth(240);</span>
+<span class="fc" id="L89">        filterPanel.setPrefWidth(260);</span>
+
+<span class="fc" id="L91">        VBox tablePanel = createTablePanel();</span>
+<span class="fc" id="L92">        HBox.setHgrow(tablePanel, Priority.ALWAYS);</span>
+
+<span class="fc" id="L94">        HBox content = new HBox(20, filterPanel, tablePanel);</span>
+<span class="fc" id="L95">        return content;</span>
+    }
+
+
+
+    private VBox createFilterPanel() {
+<span class="fc" id="L101">        Label filterTitle = new Label(&quot;⚙  Фільтри&quot;);</span>
+<span class="fc" id="L102">        filterTitle.getStyleClass().add(&quot;filter-main-title&quot;);</span>
+
+<span class="fc" id="L104">        VBox nameSection = createNameSearchSection();</span>
+
+<span class="fc" id="L106">        VBox typeSection = createTypeFilterSection();</span>
+
+<span class="fc" id="L108">        VBox priceSection = createPriceFilterSection();</span>
+
+<span class="fc" id="L110">        VBox stemSection = createStemFilterSection();</span>
+
+<span class="fc" id="L112">        VBox colorSection = createColorFilterSection();</span>
+
+<span class="fc" id="L114">        Button resetBtn = new Button(&quot;↺  Скинути фільтри&quot;);</span>
+<span class="fc" id="L115">        resetBtn.getStyleClass().add(&quot;btn-reset&quot;);</span>
+<span class="fc" id="L116">        resetBtn.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="fc" id="L117">        resetBtn.setOnAction(e -&gt; resetFilters());</span>
+
+<span class="fc" id="L119">        resultsCountLabel = new Label(&quot;Знайдено: 0 з 0 квітів&quot;);</span>
+<span class="fc" id="L120">        resultsCountLabel.getStyleClass().add(&quot;filter-results-label&quot;);</span>
+
+<span class="fc" id="L122">        VBox filterContent = new VBox(16,</span>
+                filterTitle,
+                nameSection,
+<span class="fc" id="L125">                createFilterSeparator(),</span>
+                typeSection,
+<span class="fc" id="L127">                createFilterSeparator(),</span>
+                priceSection,
+<span class="fc" id="L129">                createFilterSeparator(),</span>
+                stemSection,
+<span class="fc" id="L131">                createFilterSeparator(),</span>
+                colorSection,
+<span class="fc" id="L133">                createFilterSeparator(),</span>
+                resetBtn,
+                resultsCountLabel
+        );
+<span class="fc" id="L137">        filterContent.setPadding(new Insets(4));</span>
+
+<span class="fc" id="L139">        ScrollPane scroll = new ScrollPane(filterContent);</span>
+<span class="fc" id="L140">        scroll.setFitToWidth(true);</span>
+<span class="fc" id="L141">        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);</span>
+<span class="fc" id="L142">        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);</span>
+<span class="fc" id="L143">        scroll.getStyleClass().add(&quot;filter-scroll&quot;);</span>
+
+<span class="fc" id="L145">        VBox panel = new VBox(scroll);</span>
+<span class="fc" id="L146">        panel.getStyleClass().add(&quot;card&quot;);</span>
+<span class="fc" id="L147">        VBox.setVgrow(scroll, Priority.ALWAYS);</span>
+<span class="fc" id="L148">        return panel;</span>
+    }
+
+    private Region createFilterSeparator() {
+<span class="fc" id="L152">        Region sep = new Region();</span>
+<span class="fc" id="L153">        sep.getStyleClass().add(&quot;filter-separator&quot;);</span>
+<span class="fc" id="L154">        sep.setMinHeight(1);</span>
+<span class="fc" id="L155">        sep.setMaxHeight(1);</span>
+<span class="fc" id="L156">        return sep;</span>
+    }
+
+    private VBox createNameSearchSection() {
+<span class="fc" id="L160">        Label title = new Label(&quot;Назва&quot;);</span>
+<span class="fc" id="L161">        title.getStyleClass().add(&quot;filter-section-title&quot;);</span>
+
+<span class="fc" id="L163">        nameSearchField = new TextField();</span>
+<span class="fc" id="L164">        nameSearchField.setPromptText(&quot;\uD83D\uDD0D  Пошук за назвою...&quot;);</span>
+<span class="fc" id="L165">        nameSearchField.getStyleClass().add(&quot;search-field&quot;);</span>
+<span class="fc" id="L166">        nameSearchField.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="fc" id="L167">        nameSearchField.textProperty().addListener((obs, o, n) -&gt; applyFilters());</span>
+
+<span class="fc" id="L169">        return new VBox(6, title, nameSearchField);</span>
+    }
+
+    private VBox createTypeFilterSection() {
+<span class="fc" id="L173">        Label title = new Label(&quot;Тип квітки&quot;);</span>
+<span class="fc" id="L174">        title.getStyleClass().add(&quot;filter-section-title&quot;);</span>
+
+<span class="fc" id="L176">        VBox checkboxes = new VBox(4);</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">        for (int i = 0; i &lt; FLOWER_TYPES.length; i++) {</span>
+<span class="fc" id="L178">            CheckBox cb = new CheckBox(FLOWER_TYPE_EMOJIS[i] + &quot;  &quot; + FLOWER_TYPES[i]);</span>
+<span class="fc" id="L179">            cb.setSelected(true);</span>
+<span class="fc" id="L180">            cb.getStyleClass().add(&quot;filter-checkbox&quot;);</span>
+<span class="fc" id="L181">            cb.selectedProperty().addListener((obs, o, n) -&gt; applyFilters());</span>
+<span class="fc" id="L182">            typeCheckboxes.put(FLOWER_TYPES[i], cb);</span>
+<span class="fc" id="L183">            checkboxes.getChildren().add(cb);</span>
+        }
+
+<span class="fc" id="L186">        Hyperlink selectAll = new Hyperlink(&quot;Обрати все&quot;);</span>
+<span class="fc" id="L187">        selectAll.getStyleClass().add(&quot;filter-link&quot;);</span>
+<span class="fc" id="L188">        selectAll.setOnAction(e -&gt; {</span>
+<span class="nc" id="L189">            typeCheckboxes.values().forEach(cb -&gt; cb.setSelected(true));</span>
+<span class="nc" id="L190">        });</span>
+<span class="fc" id="L191">        Hyperlink deselectAll = new Hyperlink(&quot;Зняти все&quot;);</span>
+<span class="fc" id="L192">        deselectAll.getStyleClass().add(&quot;filter-link&quot;);</span>
+<span class="fc" id="L193">        deselectAll.setOnAction(e -&gt; {</span>
+<span class="fc" id="L194">            typeCheckboxes.values().forEach(cb -&gt; cb.setSelected(false));</span>
+<span class="fc" id="L195">        });</span>
+<span class="fc" id="L196">        HBox links = new HBox(8, selectAll, deselectAll);</span>
+
+<span class="fc" id="L198">        return new VBox(6, title, checkboxes, links);</span>
+    }
+
+    private VBox createPriceFilterSection() {
+<span class="fc" id="L202">        Label title = new Label(&quot;Ціна (грн)&quot;);</span>
+<span class="fc" id="L203">        title.getStyleClass().add(&quot;filter-section-title&quot;);</span>
+
+<span class="fc" id="L205">        priceMinField = new TextField();</span>
+<span class="fc" id="L206">        priceMinField.setPromptText(&quot;Від&quot;);</span>
+<span class="fc" id="L207">        priceMinField.getStyleClass().add(&quot;filter-range-field&quot;);</span>
+<span class="fc" id="L208">        priceMinField.textProperty().addListener((obs, o, n) -&gt; {</span>
+<span class="nc bnc" id="L209" title="All 4 branches missed.">            if (!n.isEmpty() &amp;&amp; !n.matches(&quot;\\d*\\.?\\d*&quot;)) priceMinField.setText(o);</span>
+<span class="nc" id="L210">            else applyFilters();</span>
+<span class="nc" id="L211">        });</span>
+
+<span class="fc" id="L213">        priceMaxField = new TextField();</span>
+<span class="fc" id="L214">        priceMaxField.setPromptText(&quot;До&quot;);</span>
+<span class="fc" id="L215">        priceMaxField.getStyleClass().add(&quot;filter-range-field&quot;);</span>
+<span class="fc" id="L216">        priceMaxField.textProperty().addListener((obs, o, n) -&gt; {</span>
+<span class="nc bnc" id="L217" title="All 4 branches missed.">            if (!n.isEmpty() &amp;&amp; !n.matches(&quot;\\d*\\.?\\d*&quot;)) priceMaxField.setText(o);</span>
+<span class="nc" id="L218">            else applyFilters();</span>
+<span class="nc" id="L219">        });</span>
+
+<span class="fc" id="L221">        HBox rangeBox = new HBox(8, priceMinField, new Label(&quot;—&quot;), priceMaxField);</span>
+<span class="fc" id="L222">        rangeBox.setAlignment(Pos.CENTER_LEFT);</span>
+
+<span class="fc" id="L224">        return new VBox(6, title, rangeBox);</span>
+    }
+
+    private VBox createStemFilterSection() {
+<span class="fc" id="L228">        Label title = new Label(&quot;Довжина стебла (см)&quot;);</span>
+<span class="fc" id="L229">        title.getStyleClass().add(&quot;filter-section-title&quot;);</span>
+
+<span class="fc" id="L231">        stemMinField = new TextField();</span>
+<span class="fc" id="L232">        stemMinField.setPromptText(&quot;Від&quot;);</span>
+<span class="fc" id="L233">        stemMinField.getStyleClass().add(&quot;filter-range-field&quot;);</span>
+<span class="fc" id="L234">        stemMinField.textProperty().addListener((obs, o, n) -&gt; {</span>
+<span class="nc bnc" id="L235" title="All 4 branches missed.">            if (!n.isEmpty() &amp;&amp; !n.matches(&quot;\\d*\\.?\\d*&quot;)) stemMinField.setText(o);</span>
+<span class="nc" id="L236">            else applyFilters();</span>
+<span class="nc" id="L237">        });</span>
+
+<span class="fc" id="L239">        stemMaxField = new TextField();</span>
+<span class="fc" id="L240">        stemMaxField.setPromptText(&quot;До&quot;);</span>
+<span class="fc" id="L241">        stemMaxField.getStyleClass().add(&quot;filter-range-field&quot;);</span>
+<span class="fc" id="L242">        stemMaxField.textProperty().addListener((obs, o, n) -&gt; {</span>
+<span class="nc bnc" id="L243" title="All 4 branches missed.">            if (!n.isEmpty() &amp;&amp; !n.matches(&quot;\\d*\\.?\\d*&quot;)) stemMaxField.setText(o);</span>
+<span class="nc" id="L244">            else applyFilters();</span>
+<span class="nc" id="L245">        });</span>
+
+<span class="fc" id="L247">        HBox rangeBox = new HBox(8, stemMinField, new Label(&quot;—&quot;), stemMaxField);</span>
+<span class="fc" id="L248">        rangeBox.setAlignment(Pos.CENTER_LEFT);</span>
+
+<span class="fc" id="L250">        return new VBox(6, title, rangeBox);</span>
+    }
+
+    private VBox createColorFilterSection() {
+<span class="fc" id="L254">        Label title = new Label(&quot;Колір&quot;);</span>
+<span class="fc" id="L255">        title.getStyleClass().add(&quot;filter-section-title&quot;);</span>
+
+<span class="fc" id="L257">        FlowPane colorFlow = new FlowPane(6, 6);</span>
+<span class="fc" id="L258">        colorFlow.setPrefWrapLength(220);</span>
+
+<span class="fc bfc" id="L260" title="All 2 branches covered.">        for (String[] c : COLORS) {</span>
+<span class="fc" id="L261">            CheckBox cb = new CheckBox(c[0]);</span>
+<span class="fc" id="L262">            cb.setSelected(true);</span>
+<span class="fc" id="L263">            cb.getStyleClass().add(&quot;filter-checkbox&quot;);</span>
+
+<span class="fc" id="L265">            Rectangle rect = new Rectangle(10, 10);</span>
+<span class="fc" id="L266">            rect.setArcWidth(3);</span>
+<span class="fc" id="L267">            rect.setArcHeight(3);</span>
+<span class="fc" id="L268">            rect.setFill(Color.web(c[1]));</span>
+<span class="fc" id="L269">            rect.setStroke(Color.web(&quot;#ccc&quot;));</span>
+<span class="fc" id="L270">            cb.setGraphic(rect);</span>
+
+<span class="pc" id="L272">            cb.selectedProperty().addListener((obs, o, n) -&gt; applyFilters());</span>
+<span class="fc" id="L273">            colorCheckboxes.put(c[0], cb);</span>
+<span class="fc" id="L274">            colorFlow.getChildren().add(cb);</span>
+        }
+
+<span class="fc" id="L277">        Hyperlink selectAll = new Hyperlink(&quot;Обрати все&quot;);</span>
+<span class="fc" id="L278">        selectAll.getStyleClass().add(&quot;filter-link&quot;);</span>
+<span class="fc" id="L279">        selectAll.setOnAction(e -&gt; {</span>
+<span class="nc" id="L280">            colorCheckboxes.values().forEach(cb -&gt; cb.setSelected(true));</span>
+<span class="nc" id="L281">        });</span>
+<span class="fc" id="L282">        Hyperlink deselectAll = new Hyperlink(&quot;Зняти все&quot;);</span>
+<span class="fc" id="L283">        deselectAll.getStyleClass().add(&quot;filter-link&quot;);</span>
+<span class="fc" id="L284">        deselectAll.setOnAction(e -&gt; {</span>
+<span class="nc" id="L285">            colorCheckboxes.values().forEach(cb -&gt; cb.setSelected(false));</span>
+<span class="nc" id="L286">        });</span>
+<span class="fc" id="L287">        HBox links = new HBox(8, selectAll, deselectAll);</span>
+
+<span class="fc" id="L289">        return new VBox(6, title, colorFlow, links);</span>
+    }
+
+
+
+    private void applyFilters() {
+<span class="pc bpc" id="L295" title="1 of 2 branches missed.">        if (filteredFlowers == null) return;</span>
+
+<span class="pc bpc" id="L297" title="1 of 2 branches missed.">        String nameFilter = nameSearchField.getText() == null ? &quot;&quot; : nameSearchField.getText().trim().toLowerCase();</span>
+
+<span class="fc" id="L299">        Set&lt;String&gt; selectedTypes = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L300" title="All 2 branches covered.">        for (Map.Entry&lt;String, CheckBox&gt; entry : typeCheckboxes.entrySet()) {</span>
+<span class="fc bfc" id="L301" title="All 2 branches covered.">            if (entry.getValue().isSelected()) selectedTypes.add(entry.getKey());</span>
+<span class="fc" id="L302">        }</span>
+
+<span class="fc" id="L304">        Double priceMin = parseOptionalDouble(priceMinField.getText());</span>
+<span class="fc" id="L305">        Double priceMax = parseOptionalDouble(priceMaxField.getText());</span>
+<span class="fc" id="L306">        Double stemMin = parseOptionalDouble(stemMinField.getText());</span>
+<span class="fc" id="L307">        Double stemMax = parseOptionalDouble(stemMaxField.getText());</span>
+
+<span class="fc" id="L309">        Set&lt;String&gt; selectedColors = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L310" title="All 2 branches covered.">        for (Map.Entry&lt;String, CheckBox&gt; entry : colorCheckboxes.entrySet()) {</span>
+<span class="pc bpc" id="L311" title="1 of 2 branches missed.">            if (entry.getValue().isSelected()) selectedColors.add(entry.getKey());</span>
+<span class="fc" id="L312">        }</span>
+
+<span class="fc" id="L314">        filteredFlowers.setPredicate(flower -&gt; {</span>
+<span class="fc bfc" id="L315" title="All 4 branches covered.">            if (!nameFilter.isEmpty() &amp;&amp; !flower.getName().toLowerCase().contains(nameFilter)) {</span>
+<span class="fc" id="L316">                return false;</span>
+            }
+<span class="fc bfc" id="L318" title="All 2 branches covered.">            if (!selectedTypes.contains(flower.getTypeName())) {</span>
+<span class="fc" id="L319">                return false;</span>
+            }
+<span class="pc bpc" id="L321" title="3 of 4 branches missed.">            if (priceMin != null &amp;&amp; flower.getPrice() &lt; priceMin) return false;</span>
+<span class="pc bpc" id="L322" title="3 of 4 branches missed.">            if (priceMax != null &amp;&amp; flower.getPrice() &gt; priceMax) return false;</span>
+<span class="pc bpc" id="L323" title="3 of 4 branches missed.">            if (stemMin != null &amp;&amp; flower.getStemLength() &lt; stemMin) return false;</span>
+<span class="pc bpc" id="L324" title="3 of 4 branches missed.">            if (stemMax != null &amp;&amp; flower.getStemLength() &gt; stemMax) return false;</span>
+<span class="fc bfc" id="L325" title="All 2 branches covered.">            if (!selectedColors.contains(flower.getColor())) {</span>
+<span class="fc" id="L326">                return false;</span>
+            }
+<span class="fc" id="L328">            return true;</span>
+        });
+
+<span class="fc" id="L331">        updateResultsCount();</span>
+<span class="fc" id="L332">        logger.debug(&quot;Фільтри застосовано: знайдено &quot; + filteredFlowers.size() + &quot; з &quot; + allFlowers.size());</span>
+<span class="fc" id="L333">    }</span>
+
+    private void resetFilters() {
+<span class="fc" id="L336">        nameSearchField.clear();</span>
+<span class="fc" id="L337">        typeCheckboxes.values().forEach(cb -&gt; cb.setSelected(true));</span>
+<span class="fc" id="L338">        priceMinField.clear();</span>
+<span class="fc" id="L339">        priceMaxField.clear();</span>
+<span class="fc" id="L340">        stemMinField.clear();</span>
+<span class="fc" id="L341">        stemMaxField.clear();</span>
+<span class="fc" id="L342">        colorCheckboxes.values().forEach(cb -&gt; cb.setSelected(true));</span>
+<span class="fc" id="L343">        applyFilters();</span>
+<span class="fc" id="L344">        logger.info(&quot;Фільтри скинуто.&quot;);</span>
+<span class="fc" id="L345">        statusCallback.accept(&quot;↺ Фільтри скинуто — показано всі квіти каталогу&quot;);</span>
+<span class="fc" id="L346">    }</span>
+
+    private void updateResultsCount() {
+<span class="pc bpc" id="L349" title="1 of 2 branches missed.">        int total = allFlowers != null ? allFlowers.size() : 0;</span>
+<span class="pc bpc" id="L350" title="1 of 2 branches missed.">        int shown = filteredFlowers != null ? filteredFlowers.size() : 0;</span>
+<span class="fc" id="L351">        resultsCountLabel.setText(String.format(&quot;Знайдено: %d з %d квітів&quot;, shown, total));</span>
+<span class="pc bpc" id="L352" title="1 of 2 branches missed.">        if (shown == total) {</span>
+<span class="nc" id="L353">            resultsCountLabel.setStyle(&quot;-fx-text-fill: #6B9A9A;&quot;);</span>
+<span class="fc bfc" id="L354" title="All 2 branches covered.">        } else if (shown == 0) {</span>
+<span class="fc" id="L355">            resultsCountLabel.setStyle(&quot;-fx-text-fill: #E05555;&quot;);</span>
+        } else {
+<span class="fc" id="L357">            resultsCountLabel.setStyle(&quot;-fx-text-fill: #2AA5A5;&quot;);</span>
+        }
+<span class="fc" id="L359">    }</span>
+
+    private Double parseOptionalDouble(String text) {
+<span class="pc bpc" id="L362" title="2 of 4 branches missed.">        if (text == null || text.trim().isEmpty()) return null;</span>
+        try {
+<span class="nc" id="L364">            return Double.parseDouble(text.trim());</span>
+<span class="nc" id="L365">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L366">            return null;</span>
+        }
+    }
+
+
+
+    private VBox createTablePanel() {
+<span class="fc" id="L373">        table = createTable();</span>
+<span class="fc" id="L374">        VBox.setVgrow(table, Priority.ALWAYS);</span>
+
+<span class="fc" id="L376">        HBox buttons = createButtons();</span>
+
+<span class="fc" id="L378">        VBox panel = new VBox(12, table, buttons);</span>
+<span class="fc" id="L379">        panel.getStyleClass().add(&quot;card&quot;);</span>
+<span class="fc" id="L380">        VBox.setVgrow(table, Priority.ALWAYS);</span>
+<span class="fc" id="L381">        return panel;</span>
+    }
+
+    private TableView&lt;Flower&gt; createTable() {
+<span class="fc" id="L385">        TableView&lt;Flower&gt; tv = new TableView&lt;&gt;();</span>
+<span class="fc" id="L386">        tv.setPlaceholder(new Label(&quot;Немає квітів, що відповідають фільтрам&quot;));</span>
+
+<span class="fc" id="L388">        TableColumn&lt;Flower, String&gt; nameCol = col(&quot;Назва&quot;, 170, f -&gt; f.getName());</span>
+<span class="fc" id="L389">        TableColumn&lt;Flower, String&gt; typeCol = col(&quot;Тип&quot;, 90, Flower::getTypeName);</span>
+<span class="fc" id="L390">        TableColumn&lt;Flower, String&gt; priceCol = col(&quot;Ціна (грн)&quot;, 90, f -&gt; String.format(&quot;%.2f&quot;, f.getPrice()));</span>
+
+<span class="fc" id="L392">        TableColumn&lt;Flower, String&gt; colorCol = new TableColumn&lt;&gt;(&quot;Колір&quot;);</span>
+<span class="fc" id="L393">        colorCol.setCellValueFactory(d -&gt; new SimpleStringProperty(d.getValue().getColor()));</span>
+<span class="fc" id="L394">        colorCol.setPrefWidth(110);</span>
+<span class="fc" id="L395">        colorCol.setCellFactory(c -&gt; new TableCell&lt;&gt;() {</span>
+            @Override
+            protected void updateItem(String color, boolean empty) {
+<span class="fc" id="L398">                super.updateItem(color, empty);</span>
+<span class="pc bpc" id="L399" title="1 of 4 branches missed.">                if (empty || color == null) {</span>
+<span class="fc" id="L400">                    setText(null);</span>
+<span class="fc" id="L401">                    setGraphic(null);</span>
+                } else {
+<span class="fc" id="L403">                    Rectangle rect = new Rectangle(14, 14);</span>
+<span class="fc" id="L404">                    rect.setArcWidth(4);</span>
+<span class="fc" id="L405">                    rect.setArcHeight(4);</span>
+<span class="fc" id="L406">                    rect.setFill(colorToFx(color));</span>
+<span class="fc" id="L407">                    rect.setStroke(Color.web(&quot;#ccc&quot;));</span>
+<span class="fc" id="L408">                    HBox box = new HBox(6, rect, new Label(color));</span>
+<span class="fc" id="L409">                    box.setAlignment(Pos.CENTER_LEFT);</span>
+<span class="fc" id="L410">                    setGraphic(box);</span>
+<span class="fc" id="L411">                    setText(null);</span>
+                }
+<span class="fc" id="L413">            }</span>
+        });
+
+<span class="fc" id="L416">        TableColumn&lt;Flower, String&gt; stemCol = col(&quot;Стебло (см)&quot;, 90, f -&gt; String.format(&quot;%.0f&quot;, f.getStemLength()));</span>
+<span class="fc" id="L417">        TableColumn&lt;Flower, String&gt; freshCol = col(&quot;Свіжість&quot;, 100, f -&gt; f.getFreshnessDate().toString());</span>
+
+<span class="fc" id="L419">        tv.getColumns().addAll(nameCol, typeCol, priceCol, colorCol, stemCol, freshCol);</span>
+<span class="fc" id="L420">        tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);</span>
+<span class="fc" id="L421">        return tv;</span>
+    }
+
+    private TableColumn&lt;Flower, String&gt; col(String title, int width, java.util.function.Function&lt;Flower, String&gt; extractor) {
+<span class="fc" id="L425">        TableColumn&lt;Flower, String&gt; c = new TableColumn&lt;&gt;(title);</span>
+<span class="fc" id="L426">        c.setCellValueFactory(d -&gt; new SimpleStringProperty(extractor.apply(d.getValue())));</span>
+<span class="fc" id="L427">        c.setPrefWidth(width);</span>
+<span class="fc" id="L428">        return c;</span>
+    }
+
+    private HBox createButtons() {
+<span class="fc" id="L432">        Button addBtn = new Button(&quot;＋  Додати квітку&quot;);</span>
+<span class="fc" id="L433">        addBtn.getStyleClass().add(&quot;btn-primary&quot;);</span>
+<span class="fc" id="L434">        addBtn.setOnAction(e -&gt; showAddFlowerDialog());</span>
+
+<span class="fc" id="L436">        Button delBtn = new Button(&quot;\uD83D\uDDD1  Видалити&quot;);</span>
+<span class="fc" id="L437">        delBtn.getStyleClass().add(&quot;btn-danger&quot;);</span>
+<span class="fc" id="L438">        delBtn.setOnAction(e -&gt; deleteSelectedFlower());</span>
+
+<span class="fc" id="L440">        HBox box = new HBox(12, addBtn, delBtn);</span>
+<span class="fc" id="L441">        box.setAlignment(Pos.CENTER_LEFT);</span>
+<span class="fc" id="L442">        return box;</span>
+    }
+
+
+
+    private void showAddFlowerDialog() {
+<span class="fc" id="L448">        logger.info(&quot;Користувач відкрив діалог додавання нової квітки.&quot;);</span>
+<span class="fc" id="L449">        Dialog&lt;Flower&gt; dialog = new Dialog&lt;&gt;();</span>
+<span class="fc" id="L450">        dialog.setTitle(&quot;Нова квітка&quot;);</span>
+<span class="fc" id="L451">        dialog.setHeaderText(&quot;Створення нової квітки для каталогу&quot;);</span>
+<span class="fc" id="L452">        dialog.setResizable(true);</span>
+
+<span class="fc" id="L454">        ButtonType addBtnType = new ButtonType(&quot;Додати&quot;, ButtonBar.ButtonData.OK_DONE);</span>
+<span class="fc" id="L455">        dialog.getDialogPane().getButtonTypes().addAll(addBtnType, ButtonType.CANCEL);</span>
+
+<span class="fc" id="L457">        ComboBox&lt;String&gt; typeBox = new ComboBox&lt;&gt;(FXCollections.observableArrayList(FLOWER_TYPES));</span>
+<span class="fc" id="L458">        typeBox.setValue(&quot;Троянда&quot;);</span>
+<span class="fc" id="L459">        typeBox.setMaxWidth(Double.MAX_VALUE);</span>
+
+<span class="fc" id="L461">        TextField nameField = new TextField();</span>
+<span class="fc" id="L462">        nameField.setPromptText(&quot;Назва квітки&quot;);</span>
+
+<span class="fc" id="L464">        TextField priceField = new TextField();</span>
+<span class="fc" id="L465">        priceField.setPromptText(&quot;0.00&quot;);</span>
+<span class="fc" id="L466">        priceField.textProperty().addListener((obs, o, n) -&gt; {</span>
+<span class="pc bpc" id="L467" title="1 of 2 branches missed.">            if (!n.matches(&quot;\\d*\\.?\\d*&quot;)) priceField.setText(o);</span>
+<span class="fc" id="L468">        });</span>
+
+<span class="fc" id="L470">        TextField stemField = new TextField();</span>
+<span class="fc" id="L471">        stemField.setPromptText(&quot;0&quot;);</span>
+<span class="fc" id="L472">        stemField.textProperty().addListener((obs, o, n) -&gt; {</span>
+<span class="pc bpc" id="L473" title="1 of 2 branches missed.">            if (!n.matches(&quot;\\d*\\.?\\d*&quot;)) stemField.setText(o);</span>
+<span class="fc" id="L474">        });</span>
+
+<span class="fc" id="L476">        ComboBox&lt;String&gt; colorBox = new ComboBox&lt;&gt;();</span>
+<span class="fc bfc" id="L477" title="All 2 branches covered.">        for (String[] c : COLORS) colorBox.getItems().add(c[0]);</span>
+<span class="fc" id="L478">        colorBox.setValue(&quot;Червоний&quot;);</span>
+<span class="fc" id="L479">        colorBox.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="fc" id="L480">        colorBox.setCellFactory(lv -&gt; createColorCell());</span>
+<span class="fc" id="L481">        colorBox.setButtonCell(createColorCell());</span>
+
+<span class="fc" id="L483">        VBox specificFields = new VBox(8);</span>
+<span class="fc" id="L484">        updateSpecificFields(specificFields, &quot;Троянда&quot;);</span>
+
+<span class="pc" id="L486">        typeBox.setOnAction(e -&gt; updateSpecificFields(specificFields, typeBox.getValue()));</span>
+
+<span class="fc" id="L488">        GridPane grid = new GridPane();</span>
+<span class="fc" id="L489">        grid.setHgap(14);</span>
+<span class="fc" id="L490">        grid.setVgap(10);</span>
+<span class="fc" id="L491">        grid.setPadding(new Insets(20));</span>
+
+<span class="fc" id="L493">        int row = 0;</span>
+<span class="fc" id="L494">        grid.add(label(&quot;Тип квітки:&quot;), 0, row);      grid.add(typeBox, 1, row++);</span>
+<span class="fc" id="L495">        grid.add(label(&quot;Назва:&quot;), 0, row);             grid.add(nameField, 1, row++);</span>
+<span class="fc" id="L496">        grid.add(label(&quot;Ціна (грн):&quot;), 0, row);        grid.add(priceField, 1, row++);</span>
+<span class="fc" id="L497">        grid.add(label(&quot;Стебло (см):&quot;), 0, row);       grid.add(stemField, 1, row++);</span>
+<span class="fc" id="L498">        grid.add(label(&quot;Колір:&quot;), 0, row);             grid.add(colorBox, 1, row++);</span>
+<span class="fc" id="L499">        grid.add(new Separator(), 0, row++, 2, 1);</span>
+<span class="fc" id="L500">        grid.add(specificFields, 0, row, 2, 1);</span>
+
+<span class="fc" id="L502">        ColumnConstraints cc1 = new ColumnConstraints(120);</span>
+<span class="fc" id="L503">        ColumnConstraints cc2 = new ColumnConstraints(240);</span>
+<span class="fc" id="L504">        grid.getColumnConstraints().addAll(cc1, cc2);</span>
+
+<span class="fc" id="L506">        dialog.getDialogPane().lookupButton(addBtnType).setDisable(true);</span>
+<span class="fc" id="L507">        nameField.textProperty().addListener((o, a, b) -&gt; validateForm(dialog, addBtnType, nameField, priceField, stemField));</span>
+<span class="fc" id="L508">        priceField.textProperty().addListener((o, a, b) -&gt; validateForm(dialog, addBtnType, nameField, priceField, stemField));</span>
+<span class="fc" id="L509">        stemField.textProperty().addListener((o, a, b) -&gt; validateForm(dialog, addBtnType, nameField, priceField, stemField));</span>
+
+<span class="fc" id="L511">        dialog.getDialogPane().setContent(grid);</span>
+<span class="fc" id="L512">        dialog.getDialogPane().setPrefWidth(420);</span>
+
+<span class="fc" id="L514">        dialog.setResultConverter(btn -&gt; {</span>
+<span class="pc bpc" id="L515" title="1 of 2 branches missed.">            if (btn == addBtnType) {</span>
+                try {
+<span class="fc" id="L517">                    String name = nameField.getText().trim();</span>
+<span class="fc" id="L518">                    double price = Double.parseDouble(priceField.getText().trim());</span>
+<span class="fc" id="L519">                    double stem = Double.parseDouble(stemField.getText().trim());</span>
+<span class="fc" id="L520">                    String color = colorBox.getValue();</span>
+<span class="fc" id="L521">                    return buildFlower(typeBox.getValue(), name, price, stem, color, specificFields);</span>
+<span class="nc" id="L522">                } catch (Exception ex) {</span>
+<span class="nc" id="L523">                    logger.error(&quot;Помилка при створенні квітки з даних форми.&quot;, ex);</span>
+<span class="nc" id="L524">                    showWarning(&quot;Помилка у введених даних: &quot; + ex.getMessage());</span>
+                }
+            }
+<span class="nc" id="L527">            return null;</span>
+        });
+
+<span class="fc" id="L530">        Optional&lt;Flower&gt; result = dialog.showAndWait();</span>
+<span class="fc" id="L531">        result.ifPresent(flower -&gt; {</span>
+<span class="fc" id="L532">            shop.addFlower(flower);</span>
+<span class="fc" id="L533">            refresh();</span>
+<span class="fc" id="L534">            logger.info(&quot;Квітку \&quot;&quot; + flower.getName() + &quot;\&quot; (&quot; + flower.getTypeName() + &quot;) додано через UI.&quot;);</span>
+<span class="fc" id="L535">            statusCallback.accept(&quot;✅ Квітку \&quot;&quot; + flower.getName() + &quot;\&quot; (&quot; + flower.getTypeName() + &quot;) додано&quot;);</span>
+<span class="fc" id="L536">        });</span>
+<span class="fc" id="L537">    }</span>
+
+    private void validateForm(Dialog&lt;?&gt; dialog, ButtonType btnType, TextField name, TextField price, TextField stem) {
+<span class="pc bpc" id="L540" title="1 of 2 branches missed.">        boolean valid = !name.getText().trim().isEmpty()</span>
+<span class="fc bfc" id="L541" title="All 2 branches covered.">                &amp;&amp; !price.getText().trim().isEmpty()</span>
+<span class="fc bfc" id="L542" title="All 2 branches covered.">                &amp;&amp; !stem.getText().trim().isEmpty();</span>
+        try {
+<span class="fc bfc" id="L544" title="All 2 branches covered.">            if (valid) {</span>
+<span class="fc" id="L545">                Double.parseDouble(price.getText().trim());</span>
+<span class="fc" id="L546">                Double.parseDouble(stem.getText().trim());</span>
+            }
+<span class="nc" id="L548">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L549">            valid = false;</span>
+<span class="fc" id="L550">        }</span>
+<span class="fc bfc" id="L551" title="All 2 branches covered.">        dialog.getDialogPane().lookupButton(btnType).setDisable(!valid);</span>
+<span class="fc" id="L552">    }</span>
+
+    private void updateSpecificFields(VBox container, String type) {
+<span class="fc" id="L555">        container.getChildren().clear();</span>
+<span class="pc bpc" id="L556" title="6 of 7 branches missed.">        switch (type) {</span>
+            case &quot;Троянда&quot; -&gt; {
+<span class="fc" id="L558">                CheckBox thorns = new CheckBox(&quot;З шипами&quot;);</span>
+<span class="fc" id="L559">                thorns.setSelected(true);</span>
+<span class="fc" id="L560">                thorns.setId(&quot;thorns&quot;);</span>
+<span class="fc" id="L561">                ComboBox&lt;String&gt; budShape = new ComboBox&lt;&gt;(FXCollections.observableArrayList(</span>
+                        &quot;Келих&quot;, &quot;Бокаловидний&quot;, &quot;Півонієвидний&quot;, &quot;Класичний&quot;, &quot;Розетковий&quot;));
+<span class="fc" id="L563">                budShape.setValue(&quot;Келих&quot;);</span>
+<span class="fc" id="L564">                budShape.setId(&quot;budShape&quot;);</span>
+<span class="fc" id="L565">                budShape.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="fc" id="L566">                container.getChildren().addAll(label(&quot;Форма бутона:&quot;), budShape, thorns);</span>
+<span class="fc" id="L567">            }</span>
+            case &quot;Тюльпан&quot; -&gt; {
+<span class="nc" id="L569">                ComboBox&lt;String&gt; petalShape = new ComboBox&lt;&gt;(FXCollections.observableArrayList(</span>
+                        &quot;Овальна&quot;, &quot;Витягнута&quot;, &quot;Округла&quot;, &quot;Зірчаста&quot;, &quot;Бахромчата&quot;));
+<span class="nc" id="L571">                petalShape.setValue(&quot;Овальна&quot;);</span>
+<span class="nc" id="L572">                petalShape.setId(&quot;petalShape&quot;);</span>
+<span class="nc" id="L573">                petalShape.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="nc" id="L574">                CheckBox dbl = new CheckBox(&quot;Махровий&quot;);</span>
+<span class="nc" id="L575">                dbl.setId(&quot;isDouble&quot;);</span>
+<span class="nc" id="L576">                container.getChildren().addAll(label(&quot;Форма пелюстки:&quot;), petalShape, dbl);</span>
+<span class="nc" id="L577">            }</span>
+            case &quot;Ромашка&quot; -&gt; {
+<span class="nc" id="L579">                TextField core = new TextField(&quot;1.5&quot;);</span>
+<span class="nc" id="L580">                core.setId(&quot;coreSize&quot;);</span>
+<span class="nc" id="L581">                core.setPromptText(&quot;Розмір (см)&quot;);</span>
+<span class="nc" id="L582">                TextField petals = new TextField(&quot;18&quot;);</span>
+<span class="nc" id="L583">                petals.setId(&quot;petalCount&quot;);</span>
+<span class="nc" id="L584">                petals.setPromptText(&quot;Кількість&quot;);</span>
+<span class="nc" id="L585">                container.getChildren().addAll(label(&quot;Розмір серцевини (см):&quot;), core, label(&quot;Кількість пелюсток:&quot;), petals);</span>
+<span class="nc" id="L586">            }</span>
+            case &quot;Лілія&quot; -&gt; {
+<span class="nc" id="L588">                ComboBox&lt;String&gt; fragrance = new ComboBox&lt;&gt;(FXCollections.observableArrayList(</span>
+                        &quot;Інтенсивний&quot;, &quot;Солодкий&quot;, &quot;Легкий&quot;, &quot;Ніжний&quot;, &quot;Без аромату&quot;));
+<span class="nc" id="L590">                fragrance.setValue(&quot;Легкий&quot;);</span>
+<span class="nc" id="L591">                fragrance.setId(&quot;fragrance&quot;);</span>
+<span class="nc" id="L592">                fragrance.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="nc" id="L593">                TextField petals = new TextField(&quot;6&quot;);</span>
+<span class="nc" id="L594">                petals.setId(&quot;petalCount&quot;);</span>
+<span class="nc" id="L595">                container.getChildren().addAll(label(&quot;Аромат:&quot;), fragrance, label(&quot;Кількість пелюсток:&quot;), petals);</span>
+<span class="nc" id="L596">            }</span>
+            case &quot;Півонія&quot; -&gt; {
+<span class="nc" id="L598">                ComboBox&lt;String&gt; bloom = new ComboBox&lt;&gt;(FXCollections.observableArrayList(</span>
+                        &quot;Бутон&quot;, &quot;Напіввідкритий&quot;, &quot;Відкритий&quot;, &quot;Повністю розкритий&quot;));
+<span class="nc" id="L600">                bloom.setValue(&quot;Відкритий&quot;);</span>
+<span class="nc" id="L601">                bloom.setId(&quot;bloomStage&quot;);</span>
+<span class="nc" id="L602">                bloom.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="nc" id="L603">                CheckBox fragrant = new CheckBox(&quot;Ароматна&quot;);</span>
+<span class="nc" id="L604">                fragrant.setSelected(true);</span>
+<span class="nc" id="L605">                fragrant.setId(&quot;isFragrant&quot;);</span>
+<span class="nc" id="L606">                container.getChildren().addAll(label(&quot;Стадія цвітіння:&quot;), bloom, fragrant);</span>
+<span class="nc" id="L607">            }</span>
+            case &quot;Орхідея&quot; -&gt; {
+<span class="nc" id="L609">                ComboBox&lt;String&gt; variety = new ComboBox&lt;&gt;(FXCollections.observableArrayList(</span>
+                        &quot;Фаленопсіс&quot;, &quot;Дендробіум&quot;, &quot;Цимбідіум&quot;, &quot;Каттлея&quot;, &quot;Ванда&quot;, &quot;Онцидіум&quot;));
+<span class="nc" id="L611">                variety.setValue(&quot;Фаленопсіс&quot;);</span>
+<span class="nc" id="L612">                variety.setId(&quot;variety&quot;);</span>
+<span class="nc" id="L613">                variety.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="nc" id="L614">                CheckBox epiphytic = new CheckBox(&quot;Епіфітна&quot;);</span>
+<span class="nc" id="L615">                epiphytic.setSelected(true);</span>
+<span class="nc" id="L616">                epiphytic.setId(&quot;isEpiphytic&quot;);</span>
+<span class="nc" id="L617">                container.getChildren().addAll(label(&quot;Сорт:&quot;), variety, epiphytic);</span>
+            }
+        }
+<span class="fc" id="L620">    }</span>
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private Flower buildFlower(String type, String name, double price, double stem, String color, VBox specific) {
+<span class="fc" id="L624">        LocalDate today = LocalDate.now();</span>
+<span class="pc bpc" id="L625" title="6 of 7 branches missed.">        return switch (type) {</span>
+<span class="fc" id="L626">            case &quot;Троянда&quot; -&gt; new Rose(name, price, stem, color, today,</span>
+<span class="fc" id="L627">                    findCheckBox(specific, &quot;thorns&quot;).isSelected(),</span>
+<span class="fc" id="L628">                    findComboBox(specific, &quot;budShape&quot;).getValue());</span>
+<span class="nc" id="L629">            case &quot;Тюльпан&quot; -&gt; new Tulip(name, price, stem, color, today,</span>
+<span class="nc" id="L630">                    findComboBox(specific, &quot;petalShape&quot;).getValue(),</span>
+<span class="nc" id="L631">                    findCheckBox(specific, &quot;isDouble&quot;).isSelected());</span>
+<span class="nc" id="L632">            case &quot;Ромашка&quot; -&gt; new Chamomile(name, price, stem, color, today,</span>
+<span class="nc" id="L633">                    Double.parseDouble(findTextField(specific, &quot;coreSize&quot;).getText()),</span>
+<span class="nc" id="L634">                    Integer.parseInt(findTextField(specific, &quot;petalCount&quot;).getText()));</span>
+<span class="nc" id="L635">            case &quot;Лілія&quot; -&gt; new Lily(name, price, stem, color, today,</span>
+<span class="nc" id="L636">                    findComboBox(specific, &quot;fragrance&quot;).getValue(),</span>
+<span class="nc" id="L637">                    Integer.parseInt(findTextField(specific, &quot;petalCount&quot;).getText()));</span>
+<span class="nc" id="L638">            case &quot;Півонія&quot; -&gt; new Peony(name, price, stem, color, today,</span>
+<span class="nc" id="L639">                    findComboBox(specific, &quot;bloomStage&quot;).getValue(),</span>
+<span class="nc" id="L640">                    findCheckBox(specific, &quot;isFragrant&quot;).isSelected());</span>
+<span class="nc" id="L641">            case &quot;Орхідея&quot; -&gt; new Orchid(name, price, stem, color, today,</span>
+<span class="nc" id="L642">                    findComboBox(specific, &quot;variety&quot;).getValue(),</span>
+<span class="nc" id="L643">                    findCheckBox(specific, &quot;isEpiphytic&quot;).isSelected());</span>
+<span class="nc" id="L644">            default -&gt; null;</span>
+        };
+    }
+
+
+
+    private void deleteSelectedFlower() {
+<span class="fc" id="L651">        Flower sel = table.getSelectionModel().getSelectedItem();</span>
+<span class="pc bpc" id="L652" title="1 of 2 branches missed.">        if (sel == null) { showWarning(&quot;Оберіть квітку для видалення&quot;); return; }</span>
+<span class="fc" id="L653">        int idx = shop.getCatalog().indexOf(sel);</span>
+<span class="pc bpc" id="L654" title="1 of 2 branches missed.">        if (idx &gt;= 0) {</span>
+<span class="fc" id="L655">            shop.removeFlower(idx);</span>
+<span class="fc" id="L656">            refresh();</span>
+<span class="fc" id="L657">            logger.info(&quot;Квітку \&quot;&quot; + sel.getName() + &quot;\&quot; видалено через UI.&quot;);</span>
+<span class="fc" id="L658">            statusCallback.accept(&quot;\uD83D\uDDD1 Квітку \&quot;&quot; + sel.getName() + &quot;\&quot; видалено&quot;);</span>
+        }
+<span class="fc" id="L660">    }</span>
+
+    private Label label(String text) {
+<span class="fc" id="L663">        Label l = new Label(text);</span>
+<span class="fc" id="L664">        l.getStyleClass().add(&quot;info-label&quot;);</span>
+<span class="fc" id="L665">        return l;</span>
+    }
+
+    private ListCell&lt;String&gt; createColorCell() {
+<span class="fc" id="L669">        return new ListCell&lt;&gt;() {</span>
+            @Override
+            protected void updateItem(String item, boolean empty) {
+<span class="fc" id="L672">                super.updateItem(item, empty);</span>
+<span class="pc bpc" id="L673" title="1 of 4 branches missed.">                if (empty || item == null) {</span>
+<span class="fc" id="L674">                    setText(null);</span>
+<span class="fc" id="L675">                    setGraphic(null);</span>
+                } else {
+<span class="fc" id="L677">                    Rectangle rect = new Rectangle(16, 16);</span>
+<span class="fc" id="L678">                    rect.setArcWidth(4);</span>
+<span class="fc" id="L679">                    rect.setArcHeight(4);</span>
+<span class="fc" id="L680">                    rect.setFill(colorToFx(item));</span>
+<span class="fc" id="L681">                    rect.setStroke(Color.web(&quot;#ccc&quot;));</span>
+<span class="fc" id="L682">                    HBox box = new HBox(8, rect, new Label(item));</span>
+<span class="fc" id="L683">                    box.setAlignment(Pos.CENTER_LEFT);</span>
+<span class="fc" id="L684">                    setGraphic(box);</span>
+<span class="fc" id="L685">                    setText(null);</span>
+                }
+<span class="fc" id="L687">            }</span>
+        };
+    }
+
+    private Color colorToFx(String name) {
+<span class="pc bpc" id="L692" title="1 of 2 branches missed.">        for (String[] c : COLORS) {</span>
+<span class="fc bfc" id="L693" title="All 2 branches covered.">            if (c[0].equals(name)) return Color.web(c[1]);</span>
+        }
+<span class="nc" id="L695">        return Color.LIGHTGRAY;</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private ComboBox&lt;String&gt; findComboBox(VBox container, String id) {
+<span class="fc" id="L700">        return (ComboBox&lt;String&gt;) container.getChildren().stream()</span>
+<span class="fc" id="L701">                .filter(n -&gt; id.equals(n.getId())).findFirst().orElse(null);</span>
+    }
+
+    private CheckBox findCheckBox(VBox container, String id) {
+<span class="fc" id="L705">        return (CheckBox) container.getChildren().stream()</span>
+<span class="fc" id="L706">                .filter(n -&gt; id.equals(n.getId())).findFirst().orElse(null);</span>
+    }
+
+    private TextField findTextField(VBox container, String id) {
+<span class="nc" id="L710">        return (TextField) container.getChildren().stream()</span>
+<span class="nc" id="L711">                .filter(n -&gt; id.equals(n.getId())).findFirst().orElse(null);</span>
+    }
+
+    private void showWarning(String msg) {
+<span class="nc" id="L715">        Alert alert = new Alert(Alert.AlertType.WARNING, msg, ButtonType.OK);</span>
+<span class="nc" id="L716">        alert.setTitle(&quot;Увага&quot;);</span>
+<span class="nc" id="L717">        alert.setHeaderText(null);</span>
+<span class="nc" id="L718">        alert.showAndWait();</span>
+<span class="nc" id="L719">    }</span>
+
+    public void refresh() {
+<span class="fc" id="L722">        allFlowers = FXCollections.observableArrayList(shop.getCatalog());</span>
+<span class="fc" id="L723">        filteredFlowers = new FilteredList&lt;&gt;(allFlowers, f -&gt; true);</span>
+<span class="fc" id="L724">        table.setItems(filteredFlowers);</span>
+<span class="fc" id="L725">        applyFilters();</span>
+<span class="fc" id="L726">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

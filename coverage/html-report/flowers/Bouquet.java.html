@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Bouquet.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">flowers</a> &gt; <span class="el_source">Bouquet.java</span></div><h1>Bouquet.java</h1><pre class="source lang-java linenums">package flowers;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class Bouquet implements Serializable {
+<span class="fc" id="L10">    private int id = -1;</span>
+    private String name;
+<span class="fc" id="L12">    private List&lt;Flower&gt; flowers = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L13">    private List&lt;Accessory&gt; accessories = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L15">    public Bouquet(String name) {</span>
+<span class="fc" id="L16">        this.name = name;</span>
+<span class="fc" id="L17">    }</span>
+
+<span class="fc" id="L19">    public int getId() { return id; }</span>
+<span class="fc" id="L20">    public void setId(int id) { this.id = id; }</span>
+<span class="fc" id="L21">    public void addFlower(Flower flower) { flowers.add(flower); }</span>
+<span class="fc" id="L22">    public void addAccessory(Accessory acc) { accessories.add(acc); }</span>
+<span class="fc" id="L23">    public String getName() { return name; }</span>
+<span class="fc" id="L24">    public void setName(String name) { this.name = name; }</span>
+<span class="fc" id="L25">    public List&lt;Flower&gt; getFlowers() { return flowers; }</span>
+<span class="fc" id="L26">    public List&lt;Accessory&gt; getAccessories() { return accessories; }</span>
+
+    public double calculateTotalPrice() {
+<span class="fc" id="L29">        double flowersPrice = flowers.stream().mapToDouble(Flower::getPrice).sum();</span>
+<span class="fc" id="L30">        double accPrice = accessories.stream().mapToDouble(Accessory::getPrice).sum();</span>
+<span class="fc" id="L31">        return flowersPrice + accPrice;</span>
+    }
+
+    public void sortFlowersByFreshness() {
+<span class="fc" id="L35">        flowers.sort(Comparator.comparing(Flower::getFreshnessDate).reversed());</span>
+<span class="fc" id="L36">    }</span>
+
+    public List&lt;Flower&gt; findFlowersByStemLength(double min, double max) {
+<span class="fc" id="L39">        return flowers.stream()</span>
+<span class="pc bpc" id="L40" title="1 of 4 branches missed.">                .filter(f -&gt; f.getStemLength() &gt;= min &amp;&amp; f.getStemLength() &lt;= max)</span>
+<span class="fc" id="L41">                .collect(Collectors.toList());</span>
+    }
+
+    public void removeFlower(int index) {
+<span class="fc bfc" id="L45" title="All 4 branches covered.">        if (index &gt;= 0 &amp;&amp; index &lt; flowers.size()) {</span>
+<span class="fc" id="L46">            flowers.remove(index);</span>
+        }
+<span class="fc" id="L48">    }</span>
+
+    public void removeAccessory(int index) {
+<span class="fc bfc" id="L51" title="All 4 branches covered.">        if (index &gt;= 0 &amp;&amp; index &lt; accessories.size()) {</span>
+<span class="fc" id="L52">            accessories.remove(index);</span>
+        }
+<span class="fc" id="L54">    }</span>
+
+    @Override
+    public String toString() {
+<span class="fc" id="L58">        return &quot;Букет '&quot; + name + &quot;' (Квітів: &quot; + flowers.size() + &quot;, Ціна: &quot; + calculateTotalPrice() + &quot;)&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DatabaseManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">database</a> &gt; <span class="el_source">DatabaseManager.java</span></div><h1>DatabaseManager.java</h1><pre class="source lang-java linenums">package database;
+
+import flowers.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.sql.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+public class DatabaseManager {
+
+<span class="fc" id="L14">    private static final Logger logger = LogManager.getLogger(DatabaseManager.class);</span>
+    protected String getDbUrl() {
+<span class="fc" id="L16">        return &quot;jdbc:sqlite:flower_shop.db&quot;;</span>
+    }
+
+<span class="fc" id="L19">    public DatabaseManager() {</span>
+<span class="fc" id="L20">        initDatabase();</span>
+<span class="fc" id="L21">    }</span>
+
+    protected Connection getConnection() throws SQLException {
+<span class="fc" id="L24">        Connection conn = DriverManager.getConnection(getDbUrl());</span>
+<span class="fc" id="L25">        try (Statement stmt = conn.createStatement()) {</span>
+<span class="fc" id="L26">            stmt.execute(&quot;PRAGMA foreign_keys = ON&quot;);</span>
+        }
+<span class="fc" id="L28">        return conn;</span>
+    }
+
+    public void initDatabase() {
+<span class="fc" id="L32">        try (Connection conn = getConnection();</span>
+<span class="fc" id="L33">             Statement stmt = conn.createStatement()) {</span>
+
+<span class="fc" id="L35">            stmt.execute(&quot;CREATE TABLE IF NOT EXISTS flowers (&quot;</span>
+                    + &quot;id INTEGER PRIMARY KEY AUTOINCREMENT, &quot;
+                    + &quot;type TEXT NOT NULL, &quot;
+                    + &quot;name TEXT NOT NULL, &quot;
+                    + &quot;price REAL NOT NULL, &quot;
+                    + &quot;stem_length REAL NOT NULL, &quot;
+                    + &quot;color TEXT NOT NULL, &quot;
+                    + &quot;freshness_date TEXT NOT NULL, &quot;
+                    + &quot;has_thorns INTEGER, &quot;
+                    + &quot;bud_shape TEXT, &quot;
+                    + &quot;petal_shape TEXT, &quot;
+                    + &quot;is_double INTEGER, &quot;
+                    + &quot;core_size REAL, &quot;
+                    + &quot;petal_count INTEGER, &quot;
+                    + &quot;fragrance TEXT, &quot;
+                    + &quot;bloom_stage TEXT, &quot;
+                    + &quot;is_fragrant INTEGER, &quot;
+                    + &quot;orchid_variety TEXT, &quot;
+                    + &quot;is_epiphytic INTEGER)&quot;);
+
+<span class="fc" id="L55">            stmt.execute(&quot;CREATE TABLE IF NOT EXISTS bouquets (&quot;</span>
+                    + &quot;id INTEGER PRIMARY KEY AUTOINCREMENT, &quot;
+                    + &quot;name TEXT NOT NULL)&quot;);
+
+<span class="fc" id="L59">            stmt.execute(&quot;CREATE TABLE IF NOT EXISTS bouquet_flowers (&quot;</span>
+                    + &quot;id INTEGER PRIMARY KEY AUTOINCREMENT, &quot;
+                    + &quot;bouquet_id INTEGER NOT NULL, &quot;
+                    + &quot;flower_id INTEGER NOT NULL, &quot;
+                    + &quot;FOREIGN KEY (bouquet_id) REFERENCES bouquets(id) ON DELETE CASCADE, &quot;
+                    + &quot;FOREIGN KEY (flower_id) REFERENCES flowers(id) ON DELETE CASCADE)&quot;);
+
+<span class="fc" id="L66">            stmt.execute(&quot;CREATE TABLE IF NOT EXISTS accessories (&quot;</span>
+                    + &quot;id INTEGER PRIMARY KEY AUTOINCREMENT, &quot;
+                    + &quot;bouquet_id INTEGER NOT NULL, &quot;
+                    + &quot;name TEXT NOT NULL, &quot;
+                    + &quot;price REAL NOT NULL, &quot;
+                    + &quot;color TEXT DEFAULT '', &quot;
+                    + &quot;FOREIGN KEY (bouquet_id) REFERENCES bouquets(id) ON DELETE CASCADE)&quot;);
+
+<span class="fc" id="L74">            addColumnIfMissing(stmt, &quot;flowers&quot;, &quot;fragrance&quot;, &quot;TEXT&quot;);</span>
+<span class="fc" id="L75">            addColumnIfMissing(stmt, &quot;flowers&quot;, &quot;bloom_stage&quot;, &quot;TEXT&quot;);</span>
+<span class="fc" id="L76">            addColumnIfMissing(stmt, &quot;flowers&quot;, &quot;is_fragrant&quot;, &quot;INTEGER&quot;);</span>
+<span class="fc" id="L77">            addColumnIfMissing(stmt, &quot;flowers&quot;, &quot;orchid_variety&quot;, &quot;TEXT&quot;);</span>
+<span class="fc" id="L78">            addColumnIfMissing(stmt, &quot;flowers&quot;, &quot;is_epiphytic&quot;, &quot;INTEGER&quot;);</span>
+<span class="fc" id="L79">            addColumnIfMissing(stmt, &quot;accessories&quot;, &quot;color&quot;, &quot;TEXT DEFAULT ''&quot;);</span>
+
+<span class="fc" id="L81">            logger.info(&quot;База даних ініціалізована.&quot;);</span>
+<span class="nc" id="L82">        } catch (SQLException e) {</span>
+<span class="nc" id="L83">            logger.fatal(&quot;КРИТИЧНА ПОМИЛКА: не вдалося ініціалізувати базу даних!&quot;, e);</span>
+<span class="fc" id="L84">        }</span>
+<span class="fc" id="L85">    }</span>
+
+    private void addColumnIfMissing(Statement stmt, String table, String column, String type) {
+        try {
+<span class="nc" id="L89">            stmt.execute(&quot;ALTER TABLE &quot; + table + &quot; ADD COLUMN &quot; + column + &quot; &quot; + type);</span>
+<span class="fc" id="L90">        } catch (SQLException ignored) {</span>
+
+<span class="nc" id="L92">        }</span>
+<span class="fc" id="L93">    }</span>
+
+
+    public int insertFlower(Flower flower) {
+<span class="fc" id="L97">        String sql = &quot;INSERT INTO flowers (type, name, price, stem_length, color, freshness_date, &quot;</span>
+                + &quot;has_thorns, bud_shape, petal_shape, is_double, core_size, petal_count, &quot;
+                + &quot;fragrance, bloom_stage, is_fragrant, orchid_variety, is_epiphytic) &quot;
+                + &quot;VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)&quot;;
+
+<span class="fc" id="L102">        try (Connection conn = getConnection();</span>
+<span class="fc" id="L103">             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {</span>
+
+            String type;
+<span class="fc bfc" id="L106" title="All 2 branches covered.">            if (flower instanceof Rose) type = &quot;ROSE&quot;;</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">            else if (flower instanceof Tulip) type = &quot;TULIP&quot;;</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">            else if (flower instanceof Chamomile) type = &quot;CHAMOMILE&quot;;</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">            else if (flower instanceof Lily) type = &quot;LILY&quot;;</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">            else if (flower instanceof Peony) type = &quot;PEONY&quot;;</span>
+<span class="pc bpc" id="L111" title="1 of 2 branches missed.">            else if (flower instanceof Orchid) type = &quot;ORCHID&quot;;</span>
+<span class="nc" id="L112">            else type = &quot;UNKNOWN&quot;;</span>
+
+<span class="fc" id="L114">            ps.setString(1, type);</span>
+<span class="fc" id="L115">            ps.setString(2, flower.getName());</span>
+<span class="fc" id="L116">            ps.setDouble(3, flower.getPrice());</span>
+<span class="fc" id="L117">            ps.setDouble(4, flower.getStemLength());</span>
+<span class="fc" id="L118">            ps.setString(5, flower.getColor());</span>
+<span class="fc" id="L119">            ps.setString(6, flower.getFreshnessDate().toString());</span>
+
+<span class="fc bfc" id="L121" title="All 2 branches covered.">            for (int i = 7; i &lt;= 17; i++) ps.setNull(i, Types.VARCHAR);</span>
+
+<span class="fc bfc" id="L123" title="All 2 branches covered.">            if (flower instanceof Rose r) {</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">                ps.setInt(7, r.isHasThorns() ? 1 : 0);</span>
+<span class="fc" id="L125">                ps.setString(8, r.getBudShape());</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">            } else if (flower instanceof Tulip t) {</span>
+<span class="fc" id="L127">                ps.setString(9, t.getPetalShape());</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">                ps.setInt(10, t.isDouble() ? 1 : 0);</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">            } else if (flower instanceof Chamomile c) {</span>
+<span class="fc" id="L130">                ps.setDouble(11, c.getCoreSize());</span>
+<span class="fc" id="L131">                ps.setInt(12, c.getPetalCount());</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">            } else if (flower instanceof Lily l) {</span>
+<span class="fc" id="L133">                ps.setString(13, l.getFragrance());</span>
+<span class="fc" id="L134">                ps.setInt(12, l.getPetalCount());</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">            } else if (flower instanceof Peony p) {</span>
+<span class="fc" id="L136">                ps.setString(14, p.getBloomStage());</span>
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">                ps.setInt(15, p.isFragrant() ? 1 : 0);</span>
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">            } else if (flower instanceof Orchid o) {</span>
+<span class="fc" id="L139">                ps.setString(16, o.getVariety());</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">                ps.setInt(17, o.isEpiphytic() ? 1 : 0);</span>
+            }
+
+<span class="fc" id="L143">            ps.executeUpdate();</span>
+<span class="fc" id="L144">            try (ResultSet keys = ps.getGeneratedKeys()) {</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">                if (keys.next()) {</span>
+<span class="fc" id="L146">                    int id = keys.getInt(1);</span>
+<span class="fc" id="L147">                    flower.setId(id);</span>
+<span class="fc" id="L148">                    return id;</span>
+                }
+<span class="pc bpc" id="L150" title="1 of 2 branches missed.">            }</span>
+<span class="pc bpc" id="L151" title="2 of 4 branches missed.">        } catch (SQLException e) {</span>
+<span class="nc" id="L152">            logger.error(&quot;Помилка вставки квітки '&quot; + flower.getName() + &quot;' в БД!&quot;, e);</span>
+<span class="nc" id="L153">        }</span>
+<span class="nc" id="L154">        return -1;</span>
+    }
+
+    public List&lt;Flower&gt; getAllFlowers() {
+<span class="fc" id="L158">        List&lt;Flower&gt; list = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L159">        try (Connection conn = getConnection();</span>
+<span class="fc" id="L160">             Statement stmt = conn.createStatement();</span>
+<span class="fc" id="L161">             ResultSet rs = stmt.executeQuery(&quot;SELECT * FROM flowers&quot;)) {</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">            while (rs.next()) {</span>
+<span class="fc" id="L163">                Flower f = buildFlowerFromResultSet(rs);</span>
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">                if (f != null) list.add(f);</span>
+<span class="fc" id="L165">            }</span>
+<span class="nc" id="L166">        } catch (SQLException e) {</span>
+<span class="nc" id="L167">            logger.error(&quot;Помилка читання квітів з БД!&quot;, e);</span>
+<span class="fc" id="L168">        }</span>
+<span class="fc" id="L169">        return list;</span>
+    }
+
+    public void deleteFlower(int id) {
+<span class="fc" id="L173">        try (Connection conn = getConnection();</span>
+<span class="fc" id="L174">             PreparedStatement ps = conn.prepareStatement(&quot;DELETE FROM flowers WHERE id = ?&quot;)) {</span>
+<span class="fc" id="L175">            ps.setInt(1, id);</span>
+<span class="fc" id="L176">            ps.executeUpdate();</span>
+<span class="fc" id="L177">            logger.debug(&quot;Квітку з id=&quot; + id + &quot; видалено з БД.&quot;);</span>
+<span class="nc" id="L178">        } catch (SQLException e) {</span>
+<span class="nc" id="L179">            logger.error(&quot;Помилка видалення квітки id=&quot; + id + &quot; з БД!&quot;, e);</span>
+<span class="fc" id="L180">        }</span>
+<span class="fc" id="L181">    }</span>
+
+
+    public int insertBouquet(Bouquet bouquet) {
+<span class="fc" id="L185">        try (Connection conn = getConnection();</span>
+<span class="fc" id="L186">             PreparedStatement ps = conn.prepareStatement(&quot;INSERT INTO bouquets (name) VALUES (?)&quot;, Statement.RETURN_GENERATED_KEYS)) {</span>
+<span class="fc" id="L187">            ps.setString(1, bouquet.getName());</span>
+<span class="fc" id="L188">            ps.executeUpdate();</span>
+<span class="fc" id="L189">            try (ResultSet keys = ps.getGeneratedKeys()) {</span>
+<span class="pc bpc" id="L190" title="1 of 2 branches missed.">                if (keys.next()) {</span>
+<span class="fc" id="L191">                    int id = keys.getInt(1);</span>
+<span class="fc" id="L192">                    bouquet.setId(id);</span>
+<span class="fc" id="L193">                    return id;</span>
+                }
+<span class="pc bpc" id="L195" title="1 of 2 branches missed.">            }</span>
+<span class="pc bpc" id="L196" title="2 of 4 branches missed.">        } catch (SQLException e) {</span>
+<span class="nc" id="L197">            logger.error(&quot;Помилка вставки букету!&quot;, e);</span>
+<span class="nc" id="L198">        }</span>
+<span class="nc" id="L199">        return -1;</span>
+    }
+
+    public void deleteBouquet(int id) {
+<span class="fc" id="L203">        try (Connection conn = getConnection();</span>
+<span class="fc" id="L204">             PreparedStatement ps = conn.prepareStatement(&quot;DELETE FROM bouquets WHERE id = ?&quot;)) {</span>
+<span class="fc" id="L205">            ps.setInt(1, id);</span>
+<span class="fc" id="L206">            ps.executeUpdate();</span>
+<span class="fc" id="L207">            logger.debug(&quot;Букет з id=&quot; + id + &quot; видалено з БД.&quot;);</span>
+<span class="nc" id="L208">        } catch (SQLException e) {</span>
+<span class="nc" id="L209">            logger.error(&quot;Помилка видалення букету id=&quot; + id + &quot;!&quot;, e);</span>
+<span class="fc" id="L210">        }</span>
+<span class="fc" id="L211">    }</span>
+
+    public void updateBouquetName(int bouquetId, String newName) {
+<span class="fc" id="L214">        try (Connection conn = getConnection();</span>
+<span class="fc" id="L215">             PreparedStatement ps = conn.prepareStatement(&quot;UPDATE bouquets SET name = ? WHERE id = ?&quot;)) {</span>
+<span class="fc" id="L216">            ps.setString(1, newName);</span>
+<span class="fc" id="L217">            ps.setInt(2, bouquetId);</span>
+<span class="fc" id="L218">            ps.executeUpdate();</span>
+<span class="fc" id="L219">            logger.debug(&quot;Букет id=&quot; + bouquetId + &quot; перейменовано на '&quot; + newName + &quot;' в БД.&quot;);</span>
+<span class="nc" id="L220">        } catch (SQLException e) {</span>
+<span class="nc" id="L221">            logger.error(&quot;Помилка перейменування букету id=&quot; + bouquetId + &quot;!&quot;, e);</span>
+<span class="fc" id="L222">        }</span>
+<span class="fc" id="L223">    }</span>
+
+    public List&lt;Bouquet&gt; getAllBouquetsWithContents() {
+<span class="fc" id="L226">        List&lt;Bouquet&gt; bouquets = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L227">        try (Connection conn = getConnection();</span>
+<span class="fc" id="L228">             Statement stmt = conn.createStatement();</span>
+<span class="fc" id="L229">             ResultSet rs = stmt.executeQuery(&quot;SELECT * FROM bouquets&quot;)) {</span>
+<span class="fc bfc" id="L230" title="All 2 branches covered.">            while (rs.next()) {</span>
+<span class="fc" id="L231">                Bouquet b = new Bouquet(rs.getString(&quot;name&quot;));</span>
+<span class="fc" id="L232">                b.setId(rs.getInt(&quot;id&quot;));</span>
+<span class="fc" id="L233">                loadBouquetFlowers(conn, b);</span>
+<span class="fc" id="L234">                loadBouquetAccessories(conn, b);</span>
+<span class="fc" id="L235">                bouquets.add(b);</span>
+<span class="fc" id="L236">            }</span>
+<span class="nc" id="L237">        } catch (SQLException e) {</span>
+<span class="nc" id="L238">            logger.error(&quot;Помилка читання букетів!&quot;, e);</span>
+<span class="fc" id="L239">        }</span>
+<span class="fc" id="L240">        return bouquets;</span>
+    }
+
+    private void loadBouquetFlowers(Connection conn, Bouquet b) throws SQLException {
+<span class="fc" id="L244">        try (PreparedStatement ps = conn.prepareStatement(</span>
+                &quot;SELECT f.* FROM flowers f JOIN bouquet_flowers bf ON f.id = bf.flower_id WHERE bf.bouquet_id = ? ORDER BY bf.id&quot;)) {
+<span class="fc" id="L246">            ps.setInt(1, b.getId());</span>
+<span class="fc" id="L247">            try (ResultSet rs = ps.executeQuery()) {</span>
+<span class="fc bfc" id="L248" title="All 2 branches covered.">                while (rs.next()) {</span>
+<span class="fc" id="L249">                    Flower f = buildFlowerFromResultSet(rs);</span>
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">                    if (f != null) b.addFlower(f);</span>
+<span class="fc" id="L251">                }</span>
+            }
+        }
+<span class="fc" id="L254">    }</span>
+
+    private void loadBouquetAccessories(Connection conn, Bouquet b) throws SQLException {
+<span class="fc" id="L257">        try (PreparedStatement ps = conn.prepareStatement(&quot;SELECT * FROM accessories WHERE bouquet_id = ?&quot;)) {</span>
+<span class="fc" id="L258">            ps.setInt(1, b.getId());</span>
+<span class="fc" id="L259">            try (ResultSet rs = ps.executeQuery()) {</span>
+<span class="fc bfc" id="L260" title="All 2 branches covered.">                while (rs.next()) {</span>
+<span class="fc" id="L261">                    String color = rs.getString(&quot;color&quot;);</span>
+<span class="fc" id="L262">                    Accessory acc = new Accessory(rs.getString(&quot;name&quot;), rs.getDouble(&quot;price&quot;),</span>
+<span class="pc bpc" id="L263" title="1 of 2 branches missed.">                            color != null ? color : &quot;&quot;);</span>
+<span class="fc" id="L264">                    acc.setId(rs.getInt(&quot;id&quot;));</span>
+<span class="fc" id="L265">                    b.addAccessory(acc);</span>
+<span class="fc" id="L266">                }</span>
+            }
+        }
+<span class="fc" id="L269">    }</span>
+
+
+    public void addFlowerToBouquet(int bouquetId, int flowerId) {
+<span class="fc" id="L273">        try (Connection conn = getConnection();</span>
+<span class="fc" id="L274">             PreparedStatement ps = conn.prepareStatement(&quot;INSERT INTO bouquet_flowers (bouquet_id, flower_id) VALUES (?, ?)&quot;)) {</span>
+<span class="fc" id="L275">            ps.setInt(1, bouquetId);</span>
+<span class="fc" id="L276">            ps.setInt(2, flowerId);</span>
+<span class="fc" id="L277">            ps.executeUpdate();</span>
+<span class="fc" id="L278">            logger.debug(&quot;Зв'язок квітка id=&quot; + flowerId + &quot; → букет id=&quot; + bouquetId + &quot; додано в БД.&quot;);</span>
+<span class="nc" id="L279">        } catch (SQLException e) {</span>
+<span class="nc" id="L280">            logger.error(&quot;Помилка додавання квітки id=&quot; + flowerId + &quot; до букету id=&quot; + bouquetId + &quot;!&quot;, e);</span>
+<span class="fc" id="L281">        }</span>
+<span class="fc" id="L282">    }</span>
+
+    public void removeOneFlowerFromBouquet(int bouquetId, int flowerId) {
+<span class="fc" id="L285">        try (Connection conn = getConnection();</span>
+<span class="fc" id="L286">             PreparedStatement ps = conn.prepareStatement(</span>
+                     &quot;DELETE FROM bouquet_flowers WHERE id = (SELECT id FROM bouquet_flowers WHERE bouquet_id = ? AND flower_id = ? LIMIT 1)&quot;)) {
+<span class="fc" id="L288">            ps.setInt(1, bouquetId);</span>
+<span class="fc" id="L289">            ps.setInt(2, flowerId);</span>
+<span class="fc" id="L290">            ps.executeUpdate();</span>
+<span class="fc" id="L291">            logger.debug(&quot;Зв'язок квітка id=&quot; + flowerId + &quot; → букет id=&quot; + bouquetId + &quot; видалено з БД.&quot;);</span>
+<span class="nc" id="L292">        } catch (SQLException e) {</span>
+<span class="nc" id="L293">            logger.error(&quot;Помилка видалення квітки id=&quot; + flowerId + &quot; з букету id=&quot; + bouquetId + &quot;!&quot;, e);</span>
+<span class="fc" id="L294">        }</span>
+<span class="fc" id="L295">    }</span>
+
+
+    public int insertAccessory(int bouquetId, Accessory accessory) {
+<span class="fc" id="L299">        try (Connection conn = getConnection();</span>
+<span class="fc" id="L300">             PreparedStatement ps = conn.prepareStatement(&quot;INSERT INTO accessories (bouquet_id, name, price, color) VALUES (?, ?, ?, ?)&quot;, Statement.RETURN_GENERATED_KEYS)) {</span>
+<span class="fc" id="L301">            ps.setInt(1, bouquetId);</span>
+<span class="fc" id="L302">            ps.setString(2, accessory.getName());</span>
+<span class="fc" id="L303">            ps.setDouble(3, accessory.getPrice());</span>
+<span class="fc bfc" id="L304" title="All 2 branches covered.">            ps.setString(4, accessory.getColor() != null ? accessory.getColor() : &quot;&quot;);</span>
+<span class="fc" id="L305">            ps.executeUpdate();</span>
+<span class="fc" id="L306">            try (ResultSet keys = ps.getGeneratedKeys()) {</span>
+<span class="pc bpc" id="L307" title="1 of 2 branches missed.">                if (keys.next()) {</span>
+<span class="fc" id="L308">                    int id = keys.getInt(1);</span>
+<span class="fc" id="L309">                    accessory.setId(id);</span>
+<span class="fc" id="L310">                    return id;</span>
+                }
+<span class="pc bpc" id="L312" title="1 of 2 branches missed.">            }</span>
+<span class="pc bpc" id="L313" title="2 of 4 branches missed.">        } catch (SQLException e) {</span>
+<span class="nc" id="L314">            logger.error(&quot;Помилка вставки аксесуару!&quot;, e);</span>
+<span class="nc" id="L315">        }</span>
+<span class="nc" id="L316">        return -1;</span>
+    }
+
+    public void deleteAccessory(int id) {
+<span class="fc" id="L320">        try (Connection conn = getConnection();</span>
+<span class="fc" id="L321">             PreparedStatement ps = conn.prepareStatement(&quot;DELETE FROM accessories WHERE id = ?&quot;)) {</span>
+<span class="fc" id="L322">            ps.setInt(1, id);</span>
+<span class="fc" id="L323">            ps.executeUpdate();</span>
+<span class="fc" id="L324">            logger.debug(&quot;Аксесуар id=&quot; + id + &quot; видалено з БД.&quot;);</span>
+<span class="nc" id="L325">        } catch (SQLException e) {</span>
+<span class="nc" id="L326">            logger.error(&quot;Помилка видалення аксесуару id=&quot; + id + &quot;!&quot;, e);</span>
+<span class="fc" id="L327">        }</span>
+<span class="fc" id="L328">    }</span>
+
+
+    private Flower buildFlowerFromResultSet(ResultSet rs) throws SQLException {
+<span class="fc" id="L332">        String type = rs.getString(&quot;type&quot;);</span>
+<span class="fc" id="L333">        String name = rs.getString(&quot;name&quot;);</span>
+<span class="fc" id="L334">        double price = rs.getDouble(&quot;price&quot;);</span>
+<span class="fc" id="L335">        double stem = rs.getDouble(&quot;stem_length&quot;);</span>
+<span class="fc" id="L336">        String color = rs.getString(&quot;color&quot;);</span>
+<span class="fc" id="L337">        LocalDate fresh = LocalDate.parse(rs.getString(&quot;freshness_date&quot;));</span>
+<span class="fc" id="L338">        int id = rs.getInt(&quot;id&quot;);</span>
+
+        Flower flower;
+<span class="pc bpc" id="L341" title="1 of 7 branches missed.">        switch (type) {</span>
+            case &quot;ROSE&quot;:
+<span class="fc" id="L343">                flower = new Rose(name, price, stem, color, fresh,</span>
+<span class="pc bpc" id="L344" title="1 of 2 branches missed.">                        rs.getInt(&quot;has_thorns&quot;) == 1,</span>
+<span class="pc bpc" id="L345" title="1 of 2 branches missed.">                        rs.getString(&quot;bud_shape&quot;) != null ? rs.getString(&quot;bud_shape&quot;) : &quot;Келих&quot;);</span>
+<span class="fc" id="L346">                break;</span>
+            case &quot;TULIP&quot;:
+<span class="fc" id="L348">                flower = new Tulip(name, price, stem, color, fresh,</span>
+<span class="pc bpc" id="L349" title="1 of 2 branches missed.">                        rs.getString(&quot;petal_shape&quot;) != null ? rs.getString(&quot;petal_shape&quot;) : &quot;Овальна&quot;,</span>
+<span class="fc bfc" id="L350" title="All 2 branches covered.">                        rs.getInt(&quot;is_double&quot;) == 1);</span>
+<span class="fc" id="L351">                break;</span>
+            case &quot;CHAMOMILE&quot;:
+<span class="fc" id="L353">                flower = new Chamomile(name, price, stem, color, fresh,</span>
+<span class="fc" id="L354">                        rs.getDouble(&quot;core_size&quot;),</span>
+<span class="fc" id="L355">                        rs.getInt(&quot;petal_count&quot;));</span>
+<span class="fc" id="L356">                break;</span>
+            case &quot;LILY&quot;:
+<span class="fc" id="L358">                flower = new Lily(name, price, stem, color, fresh,</span>
+<span class="pc bpc" id="L359" title="1 of 2 branches missed.">                        rs.getString(&quot;fragrance&quot;) != null ? rs.getString(&quot;fragrance&quot;) : &quot;Легкий&quot;,</span>
+<span class="fc" id="L360">                        rs.getInt(&quot;petal_count&quot;));</span>
+<span class="fc" id="L361">                break;</span>
+            case &quot;PEONY&quot;:
+<span class="fc" id="L363">                flower = new Peony(name, price, stem, color, fresh,</span>
+<span class="pc bpc" id="L364" title="1 of 2 branches missed.">                        rs.getString(&quot;bloom_stage&quot;) != null ? rs.getString(&quot;bloom_stage&quot;) : &quot;Відкритий&quot;,</span>
+<span class="pc bpc" id="L365" title="1 of 2 branches missed.">                        rs.getInt(&quot;is_fragrant&quot;) == 1);</span>
+<span class="fc" id="L366">                break;</span>
+            case &quot;ORCHID&quot;:
+<span class="fc" id="L368">                flower = new Orchid(name, price, stem, color, fresh,</span>
+<span class="pc bpc" id="L369" title="1 of 2 branches missed.">                        rs.getString(&quot;orchid_variety&quot;) != null ? rs.getString(&quot;orchid_variety&quot;) : &quot;Фаленопсіс&quot;,</span>
+<span class="fc bfc" id="L370" title="All 2 branches covered.">                        rs.getInt(&quot;is_epiphytic&quot;) == 1);</span>
+<span class="fc" id="L371">                break;</span>
+            default:
+<span class="nc" id="L373">                logger.warn(&quot;Невідомий тип квітки: &quot; + type);</span>
+<span class="nc" id="L374">                return null;</span>
+        }
+<span class="fc" id="L376">        flower.setId(id);</span>
+<span class="fc" id="L377">        return flower;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
