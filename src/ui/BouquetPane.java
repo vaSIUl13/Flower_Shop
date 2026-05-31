@@ -344,33 +344,133 @@ public class BouquetPane extends VBox {
         List<Flower> catalog = shop.getCatalog();
         if (catalog.isEmpty()) { showWarning("Каталог порожній! Спочатку додайте квіти до каталогу."); return; }
 
-        ChoiceDialog<Flower> dialog = new ChoiceDialog<>(catalog.get(0), catalog);
-        dialog.setTitle("Додати квітку");
-        dialog.setHeaderText("Оберіть квітку з каталогу");
-        dialog.setContentText("Квітка:");
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Додати квітку до букету");
+        dialog.setHeaderText(null);
+        dialog.setResizable(true);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CLOSE);
 
-        Optional<Flower> result = dialog.showAndWait();
-        result.ifPresent(flower -> {
-            TextInputDialog qtyDialog = new TextInputDialog("1");
-            qtyDialog.setTitle("Кількість");
-            qtyDialog.setHeaderText("Скільки додати?");
-            qtyDialog.setContentText("Кількість:");
-            Optional<String> qtyResult = qtyDialog.showAndWait();
-            qtyResult.ifPresent(qtyStr -> {
-                try {
-                    int qty = Integer.parseInt(qtyStr.trim());
-                    for (int i = 0; i < qty; i++) {
-                        shop.addFlowerToBouquet(b, flower);
-                    }
-                    refreshDetails();
-                    logger.info("Додано " + qty + " шт. \"" + flower.getName() + "\" до букету \"" + b.getName() + "\".");
-                    statusCallback.accept("✅ Додано " + qty + " шт. \"" + flower.getName() + "\" до букету");
-                } catch (NumberFormatException ex) {
-                    logger.warn("Невірний формат кількості при додаванні квітки до букету: '" + qtyStr + "'");
-                    showWarning("Невірне число!");
-                }
-            });
+        Label header = new Label("🌸  Оберіть квітку з каталогу");
+        header.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2d6a4f;");
+        Label sub = new Label("Букет: \"" + b.getName() + "\"");
+        sub.setStyle("-fx-font-size: 12px; -fx-text-fill: #888;");
+
+        TextField searchField = new TextField();
+        searchField.setPromptText("🔍  Пошук за назвою...");
+        searchField.setStyle("-fx-background-radius: 20; -fx-padding: 8 16; -fx-font-size: 13px;");
+
+        ObservableList<Flower> flowerData = FXCollections.observableArrayList(catalog);
+        FilteredList<Flower> filtered = new FilteredList<>(flowerData, f -> true);
+
+        searchField.textProperty().addListener((obs, o, n) -> {
+            String q = n == null ? "" : n.trim().toLowerCase();
+            filtered.setPredicate(f -> q.isEmpty()
+                    || f.getName().toLowerCase().contains(q)
+                    || f.getTypeName().toLowerCase().contains(q));
         });
+
+        TableView<Flower> flowerTable = new TableView<>(filtered);
+        flowerTable.setPrefHeight(340);
+        flowerTable.setPrefWidth(580);
+        flowerTable.setPlaceholder(new Label("Немає квітів за вашим запитом"));
+        flowerTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TableColumn<Flower, String> nameCol = new TableColumn<>("Назва");
+        nameCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getName()));
+        nameCol.setPrefWidth(180);
+
+        TableColumn<Flower, String> typeCol = new TableColumn<>("Тип");
+        typeCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getTypeName()));
+        typeCol.setPrefWidth(100);
+        typeCol.setCellFactory(c -> new TableCell<>() {
+            @Override
+            protected void updateItem(String type, boolean empty) {
+                super.updateItem(type, empty);
+                if (empty || type == null) {
+                    setText(null); setStyle("");
+                } else {
+                    setText(type);
+                    String bg = switch (type) {
+                        case "Троянда"  -> "-fx-background-color: #FFCDD2; -fx-text-fill: #B71C1C;";
+                        case "Тюльпан"  -> "-fx-background-color: #F3E5F5; -fx-text-fill: #6A1B9A;";
+                        case "Ромашка"  -> "-fx-background-color: #FFFDE7; -fx-text-fill: #F57F17;";
+                        case "Лілія"    -> "-fx-background-color: #FFF3E0; -fx-text-fill: #E65100;";
+                        case "Півонія"  -> "-fx-background-color: #FCE4EC; -fx-text-fill: #AD1457;";
+                        case "Орхідея"  -> "-fx-background-color: #E8EAF6; -fx-text-fill: #283593;";
+                        default         -> "";
+                    };
+                    setStyle(bg + " -fx-font-weight: bold; -fx-alignment: CENTER;");
+                }
+            }
+        });
+
+        TableColumn<Flower, String> priceCol = new TableColumn<>("Ціна");
+        priceCol.setCellValueFactory(d -> new SimpleStringProperty(String.format("%.2f грн", d.getValue().getPrice())));
+        priceCol.setPrefWidth(90);
+
+        TableColumn<Flower, String> colorCol = new TableColumn<>("Колір");
+        colorCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getColor()));
+        colorCol.setPrefWidth(90);
+
+        TableColumn<Flower, String> stemCol = new TableColumn<>("Стебло");
+        stemCol.setCellValueFactory(d -> new SimpleStringProperty(String.format("%.0f см", d.getValue().getStemLength())));
+        stemCol.setPrefWidth(70);
+
+        flowerTable.getColumns().addAll(nameCol, typeCol, priceCol, colorCol, stemCol);
+
+        Label qtyLabel = new Label("Кількість:");
+        qtyLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
+        Spinner<Integer> qtySpinner = new Spinner<>(1, 99, 1);
+        qtySpinner.setEditable(true);
+        qtySpinner.setPrefWidth(80);
+
+        Button addBtn = new Button("＋  Додати до букету");
+        addBtn.setStyle("-fx-background-color: linear-gradient(to right, #2d6a4f, #40916c);"
+                + " -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px;"
+                + " -fx-padding: 8 20; -fx-background-radius: 8; -fx-cursor: hand;");
+        addBtn.setDisable(true);
+
+        Label selectedInfo = new Label("← Оберіть квітку з таблиці");
+        selectedInfo.setStyle("-fx-text-fill: #999; -fx-font-style: italic;");
+
+        flowerTable.getSelectionModel().selectedItemProperty().addListener((obs, o, n) -> {
+            addBtn.setDisable(n == null);
+            if (n != null) {
+                selectedInfo.setText("✓ " + n.getTypeName() + ": " + n.getName() + " — " + String.format("%.2f грн", n.getPrice()));
+                selectedInfo.setStyle("-fx-text-fill: #2d6a4f; -fx-font-weight: bold;");
+            } else {
+                selectedInfo.setText("← Оберіть квітку з таблиці");
+                selectedInfo.setStyle("-fx-text-fill: #999; -fx-font-style: italic;");
+            }
+        });
+
+        addBtn.setOnAction(e -> {
+            Flower selected = flowerTable.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                int qty = qtySpinner.getValue();
+                for (int i = 0; i < qty; i++) {
+                    shop.addFlowerToBouquet(b, selected);
+                }
+                refreshDetails();
+                logger.info("Додано " + qty + " шт. \"" + selected.getName() + "\" до букету \"" + b.getName() + "\".");
+                statusCallback.accept("✅ Додано " + qty + " шт. \"" + selected.getName() + "\" до букету");
+                selectedInfo.setText("✅ Додано " + qty + " шт. \"" + selected.getName() + "\"!");
+                selectedInfo.setStyle("-fx-text-fill: #2d6a4f; -fx-font-weight: bold;");
+            }
+        });
+
+        HBox bottomRow = new HBox(12, qtyLabel, qtySpinner, addBtn, selectedInfo);
+        bottomRow.setAlignment(Pos.CENTER_LEFT);
+        bottomRow.setPadding(new Insets(8, 0, 0, 0));
+
+        VBox content = new VBox(10, header, sub, searchField, flowerTable, bottomRow);
+        content.setPadding(new Insets(16));
+
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().setPrefWidth(640);
+        dialog.getDialogPane().setPrefHeight(520);
+
+        dialog.showAndWait();
     }
 
     private void removeFlowerFromBouquet() {
@@ -393,57 +493,100 @@ public class BouquetPane extends VBox {
 
         Dialog<Accessory> dialog = new Dialog<>();
         dialog.setTitle("Додати аксесуар");
-        dialog.setHeaderText("Оберіть аксесуар та колір");
+        dialog.setHeaderText(null);
         dialog.setResizable(true);
         ButtonType addType = new ButtonType("Додати", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(addType, ButtonType.CANCEL);
 
-        ComboBox<String> accBox = new ComboBox<>();
-        for (String[] a : PREDEFINED_ACCESSORIES) {
-            accBox.getItems().add(a[0] + "  —  " + a[1] + " грн");
+        Label header = new Label("🎀  Оберіть аксесуар");
+        header.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #6A1B9A;");
+        Label sub = new Label("Букет: \"" + b.getName() + "\"");
+        sub.setStyle("-fx-font-size: 12px; -fx-text-fill: #888;");
+
+        String[] accEmojis = {"🎗", "🎗", "💌", "🎀", "🎀", "📄", "📦", "✨", "🕸", "🧶",
+                "🧺", "🎁", "💌", "📌", "💎", "🌿", "✨", "🎇"};
+
+        ListView<String> accList = new ListView<>();
+        accList.setPrefHeight(200);
+        for (int i = 0; i < PREDEFINED_ACCESSORIES.length; i++) {
+            accList.getItems().add(accEmojis[i] + "  " + PREDEFINED_ACCESSORIES[i][0] + "  —  " + PREDEFINED_ACCESSORIES[i][1] + " грн");
         }
-        accBox.setValue(accBox.getItems().get(0));
-        accBox.setMaxWidth(Double.MAX_VALUE);
-
-        Label priceDisplay = new Label(PREDEFINED_ACCESSORIES[0][1] + " грн");
-        priceDisplay.getStyleClass().add("price-label");
-
-        accBox.setOnAction(e -> {
-            int idx = accBox.getSelectionModel().getSelectedIndex();
-            if (idx >= 0) {
-                priceDisplay.setText(PREDEFINED_ACCESSORIES[idx][1] + " грн");
+        accList.getSelectionModel().selectFirst();
+        accList.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    setText(item);
+                    setStyle("-fx-font-size: 13px; -fx-padding: 8 12;");
+                }
             }
         });
 
-        ComboBox<String> colorBox = new ComboBox<>();
-        for (String[] c : ACC_COLORS) colorBox.getItems().add(c[0]);
-        colorBox.setValue("Білий");
-        colorBox.setMaxWidth(Double.MAX_VALUE);
-        colorBox.setCellFactory(lv -> createAccColorCell());
-        colorBox.setButtonCell(createAccColorCell());
+        Label priceDisplay = new Label("Ціна: " + PREDEFINED_ACCESSORIES[0][1] + " грн");
+        priceDisplay.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2d6a4f;"
+                + " -fx-background-color: #E8F5E9; -fx-padding: 8 16; -fx-background-radius: 8;");
 
-        GridPane grid = new GridPane();
-        grid.setHgap(14);
-        grid.setVgap(12);
-        grid.setPadding(new Insets(20));
-        grid.add(new Label("Аксесуар:"), 0, 0);  grid.add(accBox, 1, 0);
-        grid.add(new Label("Колір:"), 0, 1);      grid.add(colorBox, 1, 1);
-        grid.add(new Label("Ціна:"), 0, 2);       grid.add(priceDisplay, 1, 2);
+        accList.getSelectionModel().selectedIndexProperty().addListener((obs, o, n) -> {
+            int idx = n.intValue();
+            if (idx >= 0 && idx < PREDEFINED_ACCESSORIES.length) {
+                priceDisplay.setText("Ціна: " + PREDEFINED_ACCESSORIES[idx][1] + " грн");
+            }
+        });
 
-        ColumnConstraints cc1 = new ColumnConstraints(90);
-        ColumnConstraints cc2 = new ColumnConstraints(280);
-        grid.getColumnConstraints().addAll(cc1, cc2);
+        Label colorTitle = new Label("Колір:");
+        colorTitle.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
 
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().setPrefWidth(430);
+        FlowPane colorFlow = new FlowPane(6, 6);
+        colorFlow.setPrefWrapLength(400);
+        ToggleGroup colorGroup = new ToggleGroup();
+        for (String[] c : ACC_COLORS) {
+            ToggleButton tb = new ToggleButton(c[0]);
+            tb.setToggleGroup(colorGroup);
+            tb.setUserData(c[0]);
+
+            Rectangle rect = new Rectangle(12, 12);
+            rect.setArcWidth(3);
+            rect.setArcHeight(3);
+            rect.setFill(Color.web(c[1]));
+            rect.setStroke(Color.web("#ccc"));
+            tb.setGraphic(rect);
+
+            tb.setStyle("-fx-font-size: 11px; -fx-padding: 4 10; -fx-background-radius: 16;"
+                    + " -fx-border-radius: 16; -fx-border-color: #ddd;");
+            tb.selectedProperty().addListener((obs, o, n) -> {
+                if (n) {
+                    tb.setStyle("-fx-font-size: 11px; -fx-padding: 4 10; -fx-background-radius: 16;"
+                            + " -fx-border-radius: 16; -fx-border-color: " + c[1] + ";"
+                            + " -fx-background-color: " + c[1] + "22; -fx-font-weight: bold;");
+                } else {
+                    tb.setStyle("-fx-font-size: 11px; -fx-padding: 4 10; -fx-background-radius: 16;"
+                            + " -fx-border-radius: 16; -fx-border-color: #ddd;");
+                }
+            });
+
+            if (c[0].equals("Білий")) { tb.setSelected(true); }
+            colorFlow.getChildren().add(tb);
+        }
+
+        VBox content = new VBox(10, header, sub, accList, priceDisplay,
+                new Separator(), colorTitle, colorFlow);
+        content.setPadding(new Insets(16));
+
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().setPrefWidth(500);
 
         dialog.setResultConverter(btn -> {
             if (btn == addType) {
-                int idx = accBox.getSelectionModel().getSelectedIndex();
+                int idx = accList.getSelectionModel().getSelectedIndex();
                 if (idx >= 0) {
                     String name = PREDEFINED_ACCESSORIES[idx][0];
                     double price = Double.parseDouble(PREDEFINED_ACCESSORIES[idx][1]);
-                    String color = colorBox.getValue();
+                    Toggle selected = colorGroup.getSelectedToggle();
+                    String color = selected != null ? (String) selected.getUserData() : "Білий";
                     return new Accessory(name, price, color);
                 }
             }

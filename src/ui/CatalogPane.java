@@ -386,7 +386,32 @@ public class CatalogPane extends VBox {
         tv.setPlaceholder(new Label("Немає квітів, що відповідають фільтрам"));
 
         TableColumn<Flower, String> nameCol = col("Назва", 170, f -> f.getName());
-        TableColumn<Flower, String> typeCol = col("Тип", 90, Flower::getTypeName);
+        TableColumn<Flower, String> typeCol = new TableColumn<>("Тип");
+        typeCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getTypeName()));
+        typeCol.setPrefWidth(90);
+        typeCol.setCellFactory(c -> new TableCell<>() {
+            @Override
+            protected void updateItem(String type, boolean empty) {
+                super.updateItem(type, empty);
+                if (empty || type == null) {
+                    setText(null);
+                    setGraphic(null);
+                    setStyle("");
+                } else {
+                    setText(type);
+                    String bg = switch (type) {
+                        case "Троянда"  -> "-fx-background-color: #FFCDD2; -fx-text-fill: #B71C1C;";
+                        case "Тюльпан"  -> "-fx-background-color: #F3E5F5; -fx-text-fill: #6A1B9A;";
+                        case "Ромашка"  -> "-fx-background-color: #FFFDE7; -fx-text-fill: #F57F17;";
+                        case "Лілія"    -> "-fx-background-color: #FFF3E0; -fx-text-fill: #E65100;";
+                        case "Півонія"  -> "-fx-background-color: #FCE4EC; -fx-text-fill: #AD1457;";
+                        case "Орхідея"  -> "-fx-background-color: #E8EAF6; -fx-text-fill: #283593;";
+                        default         -> "";
+                    };
+                    setStyle(bg + " -fx-font-weight: bold; -fx-alignment: CENTER;");
+                }
+            }
+        });
         TableColumn<Flower, String> priceCol = col("Ціна (грн)", 90, f -> String.format("%.2f", f.getPrice()));
 
         TableColumn<Flower, String> colorCol = new TableColumn<>("Колір");
@@ -437,9 +462,20 @@ public class CatalogPane extends VBox {
         delBtn.getStyleClass().add("btn-danger");
         delBtn.setOnAction(e -> deleteSelectedFlower());
 
-        HBox box = new HBox(12, addBtn, delBtn);
+        Button sortBtn = new Button("⇅  Сортувати за свіжістю");
+        sortBtn.getStyleClass().add("btn-secondary");
+        sortBtn.setOnAction(e -> sortCatalogByFreshness());
+
+        HBox box = new HBox(12, addBtn, delBtn, sortBtn);
         box.setAlignment(Pos.CENTER_LEFT);
         return box;
+    }
+
+    private void sortCatalogByFreshness() {
+        if (allFlowers == null || allFlowers.isEmpty()) return;
+        allFlowers.sort((a, b) -> b.getFreshnessDate().compareTo(a.getFreshnessDate()));
+        logger.info("Каталог відсортовано за свіжістю (найсвіжіші першими).");
+        statusCallback.accept("⇅ Каталог відсортовано за свіжістю — найсвіжіші першими");
     }
 
 
