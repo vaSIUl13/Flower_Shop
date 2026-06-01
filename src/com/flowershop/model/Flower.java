@@ -1,4 +1,4 @@
-package flowers;
+package com.flowershop.model;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -34,3 +34,4 @@ public abstract class Flower implements Serializable {
         return String.format("%s (%.2f грн, %s, %.0f см)", name, price, color, stemLength);
     }
 }
+

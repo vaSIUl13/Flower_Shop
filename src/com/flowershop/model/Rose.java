@@ -1,4 +1,4 @@
-package flowers;
+package com.flowershop.model;
 import java.time.LocalDate;
 
 public class Rose extends Flower {
@@ -22,3 +22,4 @@ public class Rose extends Flower {
         return "Троянда: " + super.toString() + (hasThorns ? ", з шипами" : "");
     }
 }
+

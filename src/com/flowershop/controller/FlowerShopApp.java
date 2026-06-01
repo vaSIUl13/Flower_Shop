@@ -1,4 +1,4 @@
-package ui;
+package com.flowershop.controller;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -9,12 +9,12 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import services.FlowerShop;
+import com.flowershop.service.FlowerShopService;
 
 public class FlowerShopApp extends Application {
 
     private static final Logger logger = LogManager.getLogger(FlowerShopApp.class);
-    private FlowerShop shop;
+    private FlowerShopService shop;
     private StackPane contentArea;
     private Label statusLabel;
 
@@ -34,10 +34,10 @@ public class FlowerShopApp extends Application {
         });
 
         try {
-            shop = new FlowerShop();
-            logger.info("Сервіс FlowerShop ініціалізовано успішно.");
+            shop = new FlowerShopService();
+            logger.info("Сервіс FlowerShopService ініціалізовано успішно.");
         } catch (Exception e) {
-            logger.fatal("Не вдалося ініціалізувати FlowerShop!", e);
+            logger.fatal("Не вдалося ініціалізувати FlowerShopService!", e);
             throw e;
         }
 
@@ -186,3 +186,5 @@ public class FlowerShopApp extends Application {
         statusLabel.setText(message);
     }
 }
+
+

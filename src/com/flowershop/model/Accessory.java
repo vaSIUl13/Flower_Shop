@@ -1,4 +1,4 @@
-package flowers;
+package com.flowershop.model;
 import java.io.Serializable;
 
 public class Accessory implements Serializable {
@@ -29,3 +29,4 @@ public class Accessory implements Serializable {
         return name + colorPart + " (" + price + " грн)";
     }
 }
+

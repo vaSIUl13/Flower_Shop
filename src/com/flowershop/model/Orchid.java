@@ -1,4 +1,4 @@
-package flowers;
+package com.flowershop.model;
 import java.time.LocalDate;
 
 public class Orchid extends Flower {
@@ -22,3 +22,5 @@ public class Orchid extends Flower {
         return "Орхідея: " + super.toString() + " (" + variety + ")";
     }
 }
+
+

@@ -1,4 +1,4 @@
-package flowers;
+package com.flowershop.model;
 import java.time.LocalDate;
 
 public class Lily extends Flower {
@@ -22,3 +22,5 @@ public class Lily extends Flower {
         return "Лілія: " + super.toString() + ", аромат: " + fragrance;
     }
 }
+
+

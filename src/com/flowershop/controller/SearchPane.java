@@ -1,4 +1,4 @@
-package ui;
+package com.flowershop.controller;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -8,8 +8,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import services.FlowerShop;
-import flowers.*;
+import com.flowershop.service.FlowerShopService;
+import com.flowershop.model.*;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 public class SearchPane extends VBox {
 
     private static final Logger logger = LogManager.getLogger(SearchPane.class);
-    private final FlowerShop shop;
+    private final FlowerShopService shop;
     private final Consumer<String> statusCallback;
 
     private ComboBox<String> bouquetCombo;
@@ -26,7 +26,7 @@ public class SearchPane extends VBox {
     private TableView<Flower> resultsTable;
     private Label resultLabel;
 
-    public SearchPane(FlowerShop shop, Consumer<String> statusCallback) {
+    public SearchPane(FlowerShopService shop, Consumer<String> statusCallback) {
         this.shop = shop;
         this.statusCallback = statusCallback;
 
@@ -173,3 +173,5 @@ public class SearchPane extends VBox {
         }
     }
 }
+
+

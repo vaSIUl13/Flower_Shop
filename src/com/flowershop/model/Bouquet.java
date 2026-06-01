@@ -1,4 +1,4 @@
-package flowers;
+package com.flowershop.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -58,3 +58,4 @@ public class Bouquet implements Serializable {
         return "Букет '" + name + "' (Квітів: " + flowers.size() + ", Ціна: " + calculateTotalPrice() + ")";
     }
 }
+

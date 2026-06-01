@@ -1,4 +1,4 @@
-package flowers;
+package com.flowershop.model;
 import java.time.LocalDate;
 
 public class Tulip extends Flower {
@@ -22,3 +22,4 @@ public class Tulip extends Flower {
         return "Тюльпан: " + super.toString();
     }
 }
+

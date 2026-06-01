@@ -1,4 +1,4 @@
-package ui;
+package com.flowershop.controller;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -12,8 +12,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import services.FlowerShop;
-import flowers.*;
+import com.flowershop.service.FlowerShopService;
+import com.flowershop.model.*;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 public class CatalogPane extends VBox {
 
     private static final Logger logger = LogManager.getLogger(CatalogPane.class);
-    private final FlowerShop shop;
+    private final FlowerShopService shop;
     private final Consumer<String> statusCallback;
     private TableView<Flower> table;
 
@@ -62,7 +62,7 @@ public class CatalogPane extends VBox {
             "🌹", "🌷", "🌼", "🌺", "🌸", "🪷"
     };
 
-    public CatalogPane(FlowerShop shop, Consumer<String> statusCallback) {
+    public CatalogPane(FlowerShopService shop, Consumer<String> statusCallback) {
         this.shop = shop;
         this.statusCallback = statusCallback;
 
@@ -761,3 +761,5 @@ public class CatalogPane extends VBox {
         applyFilters();
     }
 }
+
+

@@ -1,4 +1,4 @@
-package ui;
+package com.flowershop.controller;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -12,8 +12,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import services.FlowerShop;
-import flowers.*;
+import com.flowershop.service.FlowerShopService;
+import com.flowershop.model.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 public class BouquetPane extends VBox {
 
     private static final Logger logger = LogManager.getLogger(BouquetPane.class);
-    private final FlowerShop shop;
+    private final FlowerShopService shop;
     private final Consumer<String> statusCallback;
 
     private ListView<String> bouquetList;
@@ -65,7 +65,7 @@ public class BouquetPane extends VBox {
             {"Зелений", "#43A047"}, {"Чорний", "#333333"},
     };
 
-    public BouquetPane(FlowerShop shop, Consumer<String> statusCallback) {
+    public BouquetPane(FlowerShopService shop, Consumer<String> statusCallback) {
         this.shop = shop;
         this.statusCallback = statusCallback;
 
@@ -692,3 +692,5 @@ public class BouquetPane extends VBox {
         return Color.LIGHTGRAY;
     }
 }
+
+

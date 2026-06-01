@@ -1,6 +1,6 @@
-package database;
+package com.flowershop.repository;
 
-import flowers.*;
+import com.flowershop.model.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -9,15 +9,15 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DatabaseManager {
+public class FlowerRepository {
 
-    private static final Logger logger = LogManager.getLogger(DatabaseManager.class);
+    private static final Logger logger = LogManager.getLogger(FlowerRepository.class);
     protected String getDbUrl() {
         String envUrl = System.getProperty("test.db.url");
         return (envUrl != null) ? envUrl : "jdbc:sqlite:flower_shop.db";
     }
 
-    public DatabaseManager() {
+    public FlowerRepository() {
         initDatabase();
     }
 
@@ -378,3 +378,5 @@ public class DatabaseManager {
         return flower;
     }
 }
+
+

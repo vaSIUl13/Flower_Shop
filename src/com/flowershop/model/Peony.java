@@ -1,4 +1,4 @@
-package flowers;
+package com.flowershop.model;
 import java.time.LocalDate;
 
 public class Peony extends Flower {
@@ -22,3 +22,5 @@ public class Peony extends Flower {
         return "Півонія: " + super.toString() + " [" + bloomStage + "]";
     }
 }
+
+

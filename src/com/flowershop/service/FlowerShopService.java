@@ -1,7 +1,7 @@
-package services;
+package com.flowershop.service;
 
-import database.DatabaseManager;
-import flowers.*;
+import com.flowershop.repository.FlowerRepository;
+import com.flowershop.model.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -10,16 +10,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class FlowerShop {
-    private static final Logger logger = LogManager.getLogger(FlowerShop.class);
+public class FlowerShopService {
+    private static final Logger logger = LogManager.getLogger(FlowerShopService.class);
 
-    private final DatabaseManager db;
+    private final FlowerRepository db;
     private List<Flower> catalog = new ArrayList<>();
     private List<Bouquet> bouquets = new ArrayList<>();
     private final Scanner scanner = new Scanner(System.in);
 
-    public FlowerShop() {
-        db = new DatabaseManager();
+    public FlowerShopService() {
+        db = new FlowerRepository();
         loadFromDatabase();
         if (catalog.isEmpty()) {
             initRichCatalog();
@@ -251,3 +251,4 @@ public class FlowerShop {
         return scanner.nextLine();
     }
 }
+

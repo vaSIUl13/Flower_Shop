@@ -1,7 +1,8 @@
+package com.flowershop;
 import javafx.application.Application;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import ui.FlowerShopApp;
+import com.flowershop.controller.FlowerShopApp;
 
 public class Main {
     private static final Logger logger = LogManager.getLogger(Main.class);
@@ -18,3 +19,4 @@ public class Main {
         }
     }
 }
+

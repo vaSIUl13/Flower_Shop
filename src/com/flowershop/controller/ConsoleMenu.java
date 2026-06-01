@@ -1,8 +1,8 @@
-package menu;
+package com.flowershop.controller;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import services.FlowerShop;
+import com.flowershop.service.FlowerShopService;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -11,10 +11,10 @@ public class ConsoleMenu {
     private static final Logger logger = LogManager.getLogger(ConsoleMenu.class);
 
     private Map<String, Command> menuItems = new LinkedHashMap<>();
-    private FlowerShop shop;
+    private FlowerShopService shop;
     private Scanner scanner = new Scanner(System.in);
 
-    public ConsoleMenu(FlowerShop shop) {
+    public ConsoleMenu(FlowerShopService shop) {
         this.shop = shop;
 
         menuItems.put("Переглянути каталог", shop::viewCatalog);
@@ -63,3 +63,4 @@ public class ConsoleMenu {
         }
     }
 }
+

@@ -1,4 +1,4 @@
-package flowers;
+package com.flowershop.model;
 import java.time.LocalDate;
 
 public class Chamomile extends Flower {
@@ -22,3 +22,4 @@ public class Chamomile extends Flower {
         return "Ромашка: " + super.toString();
     }
 }
+
