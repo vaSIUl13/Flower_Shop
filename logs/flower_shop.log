@@ -1,0 +1,56 @@
+2026-06-03 17:44:34.983 [main] INFO  com.flowershop.Main - === Flower Shop Application — старт ===
+2026-06-03 17:44:35.469 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Запуск JavaFX-додатку Квітковий Магазин...
+2026-06-03 17:44:35.740 [JavaFX Application Thread] INFO  com.flowershop.repository.FlowerRepository - База даних ініціалізована.
+2026-06-03 17:44:35.775 [JavaFX Application Thread] INFO  com.flowershop.service.FlowerShopService - Завантажено з БД: квітів=28, букетів=7
+2026-06-03 17:44:35.777 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Сервіс FlowerShopService ініціалізовано успішно.
+2026-06-03 17:44:36.371 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - UI-панелі (Каталог, Букети, Пошук) створено.
+2026-06-03 17:44:36.372 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Навігація: перехід до панелі 'Каталог'.
+2026-06-03 17:44:37.402 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Додаток запущено та готовий до роботи.
+2026-06-03 17:44:39.234 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Навігація: перехід до панелі 'Букети'.
+2026-06-03 17:44:40.252 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Навігація: перехід до панелі 'Пошук'.
+2026-06-03 17:44:40.994 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Навігація: перехід до панелі 'Каталог'.
+2026-06-03 17:45:56.976 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Користувач натиснув 'Зберегти'.
+2026-06-03 17:45:56.977 [JavaFX Application Thread] INFO  com.flowershop.service.FlowerShopService - Дані зберігаються у БД автоматично.
+2026-06-03 17:46:37.587 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Навігація: перехід до панелі 'Пошук'.
+2026-06-03 17:46:50.978 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Користувач закрив додаток. Завершення роботи.
+2026-06-03 17:46:51.022 [main] INFO  com.flowershop.Main - === Flower Shop Application — завершення ===
+2026-06-03 17:47:01.331 [main] INFO  com.flowershop.Main - === Flower Shop Application — старт ===
+2026-06-03 17:47:01.762 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Запуск JavaFX-додатку Квітковий Магазин...
+2026-06-03 17:47:02.038 [JavaFX Application Thread] INFO  com.flowershop.repository.FlowerRepository - База даних ініціалізована.
+2026-06-03 17:47:02.073 [JavaFX Application Thread] INFO  com.flowershop.service.FlowerShopService - Завантажено з БД: квітів=28, букетів=7
+2026-06-03 17:47:02.073 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Сервіс FlowerShopService ініціалізовано успішно.
+2026-06-03 17:47:02.583 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - UI-панелі (Каталог, Букети, Пошук) створено.
+2026-06-03 17:47:02.584 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Навігація: перехід до панелі 'Каталог'.
+2026-06-03 17:47:03.448 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Додаток запущено та готовий до роботи.
+2026-06-03 17:48:30.320 [main] INFO  com.flowershop.Main - === Flower Shop Application — старт ===
+2026-06-03 17:48:30.692 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Запуск JavaFX-додатку Квітковий Магазин...
+2026-06-03 17:48:30.948 [JavaFX Application Thread] INFO  com.flowershop.repository.FlowerRepository - База даних ініціалізована.
+2026-06-03 17:48:30.986 [JavaFX Application Thread] INFO  com.flowershop.service.FlowerShopService - Завантажено з БД: квітів=28, букетів=7
+2026-06-03 17:48:30.987 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Сервіс FlowerShopService ініціалізовано успішно.
+2026-06-03 17:48:31.555 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - UI-панелі (Каталог, Букети, Пошук) створено.
+2026-06-03 17:48:31.556 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Навігація: перехід до панелі 'Каталог'.
+2026-06-03 17:48:32.408 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Додаток запущено та готовий до роботи.
+2026-06-03 17:48:33.612 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Навігація: перехід до панелі 'Пошук'.
+2026-06-03 17:48:34.108 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Навігація: перехід до панелі 'Букети'.
+2026-06-03 17:48:35.054 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Користувач закрив додаток. Завершення роботи.
+2026-06-03 17:48:35.117 [main] INFO  com.flowershop.Main - === Flower Shop Application — завершення ===
+2026-06-03 17:55:40.401 [main] INFO  com.flowershop.Main - === Flower Shop Application — старт ===
+2026-06-03 17:55:40.777 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Запуск JavaFX-додатку Квітковий Магазин...
+2026-06-03 17:55:41.076 [JavaFX Application Thread] INFO  com.flowershop.repository.FlowerRepository - База даних ініціалізована.
+2026-06-03 17:55:41.116 [JavaFX Application Thread] INFO  com.flowershop.service.FlowerShopService - Завантажено з БД: квітів=28, букетів=7
+2026-06-03 17:55:41.116 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Сервіс FlowerShopService ініціалізовано успішно.
+2026-06-03 17:55:41.655 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - UI-панелі (Каталог, Букети, Пошук) створено.
+2026-06-03 17:55:41.655 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Навігація: перехід до панелі 'Каталог'.
+2026-06-03 17:55:42.543 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Додаток запущено та готовий до роботи.
+2026-06-03 17:55:48.213 [JavaFX Application Thread] INFO  com.flowershop.controller.CatalogPane - Користувач відкрив діалог додавання нової квітки.
+2026-06-03 17:56:13.887 [JavaFX Application Thread] INFO  com.flowershop.service.FlowerShopService - Додано квітку: Лакшері
+2026-06-03 17:56:16.099 [JavaFX Application Thread] INFO  com.flowershop.controller.CatalogPane - Квітку "Лакшері" (Півонія) додано через UI.
+2026-06-03 17:56:44.396 [JavaFX Application Thread] INFO  com.flowershop.service.FlowerShopService - Видалено квітку з каталогу: Садовий
+2026-06-03 17:56:46.336 [JavaFX Application Thread] INFO  com.flowershop.controller.CatalogPane - Квітку "Садовий" видалено через UI.
+2026-06-03 17:56:56.286 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Навігація: перехід до панелі 'Букети'.
+2026-06-03 17:57:00.190 [JavaFX Application Thread] INFO  com.flowershop.service.FlowerShopService - Видалено букет: Тюльпани
+2026-06-03 17:57:01.886 [JavaFX Application Thread] INFO  com.flowershop.controller.BouquetPane - Видалено букет: "Тюльпани" через UI.
+2026-06-03 17:57:12.413 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Користувач натиснув 'Зберегти'.
+2026-06-03 17:57:12.413 [JavaFX Application Thread] INFO  com.flowershop.service.FlowerShopService - Дані зберігаються у БД автоматично.
+2026-06-03 17:57:13.955 [JavaFX Application Thread] INFO  com.flowershop.controller.FlowerShopApp - Користувач закрив додаток. Завершення роботи.
+2026-06-03 17:57:14.018 [main] INFO  com.flowershop.Main - === Flower Shop Application — завершення ===

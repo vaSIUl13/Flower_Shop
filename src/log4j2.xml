@@ -19,20 +19,22 @@
             <DefaultRolloverStrategy max="30"/>
         </RollingFile>
 
-        <!-- Email аппендер — надсилає ТІЛЬКИ критичні помилки (FATAL та ERROR) -->
         <SMTP name="MailLogger"
-              subject="CRITICAL ERROR: FlowerShop App"
+              subject="FlowerShop Notification: Inventory Change"
               to="mygchinkavasil@gmail.com"
               from="mygchinkavasil@gmail.com"
               smtpHost="smtp.gmail.com"
               smtpPort="465"
               smtpUsername="mygchinkavasil@gmail.com"
-              smtpPassword="vaSIUl30177"
+              smtpPassword="gxls rltn meiz bbqy"
               smtpProtocol="smtps"
               smtpDebug="false"
-              bufferSize="512">
+              bufferSize="1">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}%n%msg%n%throwable%n"/>
-            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <Filters>
+                <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+                <MarkerFilter marker="EMAIL_NOTIFY" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
         </SMTP>
     </Appenders>
 

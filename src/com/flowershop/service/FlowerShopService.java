@@ -4,6 +4,8 @@ import com.flowershop.repository.FlowerRepository;
 import com.flowershop.model.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -12,6 +14,7 @@ import java.util.Scanner;
 
 public class FlowerShopService {
     private static final Logger logger = LogManager.getLogger(FlowerShopService.class);
+    private static final Marker EMAIL_MARKER = MarkerManager.getMarker("EMAIL_NOTIFY");
 
     private final FlowerRepository db;
     private List<Flower> catalog = new ArrayList<>();
@@ -172,14 +175,14 @@ public class FlowerShopService {
     public void addFlower(Flower flower) {
         db.insertFlower(flower);
         catalog.add(flower);
-        logger.info("Додано квітку: " + flower.getName());
+        logger.info(EMAIL_MARKER, "Додано квітку: " + flower.getName());
     }
 
     public void removeFlower(int index) {
         if (index >= 0 && index < catalog.size()) {
             Flower f = catalog.remove(index);
             db.deleteFlower(f.getId());
-            logger.info("Видалено квітку: " + f.getName());
+            logger.info(EMAIL_MARKER, "Видалено квітку з каталогу: " + f.getName());
         }
     }
 
@@ -187,7 +190,7 @@ public class FlowerShopService {
         Bouquet b = new Bouquet(name);
         db.insertBouquet(b);
         bouquets.add(b);
-        logger.info("Створено букет: " + name);
+        logger.info(EMAIL_MARKER, "Створено букет: " + name);
         return b;
     }
 
@@ -195,7 +198,7 @@ public class FlowerShopService {
         if (index >= 0 && index < bouquets.size()) {
             Bouquet b = bouquets.remove(index);
             db.deleteBouquet(b.getId());
-            logger.info("Видалено букет: " + b.getName());
+            logger.info(EMAIL_MARKER, "Видалено букет: " + b.getName());
         }
     }
 
