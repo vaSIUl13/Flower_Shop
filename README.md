@@ -1,101 +1,120 @@
-# Інформаційна Система «Квітковий Магазин»
-## Архітектурна структура та технічний опис проекту
+# 🌸 Flower Shop
 
-Цей документ містить опис структури каталогів, архітектурних рішень, взаємозв'язків між класами та призначення файлів в інформаційній системі квіткового магазину.
+A JavaFX desktop application for managing a flower shop’s catalog and creating custom bouquets. Browse and search flowers, combine them with accessories, and keep the catalog and bouquet data in a local SQLite database.
 
----
+## ✨ Features
 
-## Огляд архітектури
+- Browse a catalog of roses, tulips, chamomile, lilies, peonies, and orchids.
+- Search the catalog for flowers and bouquets.
+- Add and remove flowers from the catalog.
+- Create, rename, and manage bouquets.
+- Add flowers and accessories to bouquets.
+- View flower and bouquet information, including prices and flower-specific characteristics.
+- Store application data locally in SQLite—no database server required.
+- Use the JavaFX graphical interface or the additional console menu.
 
-Проект побудовано відповідно до класичної трирівневої архітектури (з шарами Controller, Service, Repository, Model, DTO) та шаблону MVC (Model-View-Controller) із рівнем збереження даних (Persistence Layer) у базі даних SQLite:
+## 🧰 Technology stack
 
-*   **Model (Моделі)**: класи пакету `com.flowershop.model` (квіти, аксесуари, букет), що містять бізнес-дані та базові алгоритми (розрахунок вартості, сортування, пошук).
-*   **Controller (Презентаційний шар)**: класи пакету `com.flowershop.controller`, які відповідають за графічний інтерфейс (`CatalogPane`, `BouquetPane`, `FlowerShopApp`) та консольне меню (`ConsoleMenu`), а також стилі (`styles.css`).
-*   **Service (Бізнес-логіка)**: клас `FlowerShopService.java` у пакеті `com.flowershop.service`, який керує бізнес-логікою та координує роботу між контролерами та репозиторієм.
-*   **Repository (Доступ до БД)**: клас `FlowerRepository.java` у пакеті `com.flowershop.repository`, який відповідає за підключення до SQLite та виконання SQL-запитів.
-*   **DTO (Об'єкти передачі даних)**: класи у пакеті `com.flowershop.dto` (наприклад, `FlowerDto`), призначені для передачі даних між шарами.
+### Desktop UI
 
----
+| Tool | Role |
+|---|---|
+| ![JavaFX](https://img.shields.io/badge/JavaFX-Desktop_UI-5382A1?logo=openjdk&logoColor=white) | Builds the desktop interface and UI components |
+| ![CSS](https://img.shields.io/badge/CSS-Styles-1572B6?logo=css&logoColor=white) | Styles the JavaFX interface |
 
-## Структура каталогів
+### Application
 
-Візуальна структура папок та файлів проекту:
+| Tool | Role |
+|---|---|
+| ![Java](https://img.shields.io/badge/Java-21%2B-007396?logo=openjdk&logoColor=white) | Application language |
+| ![JDBC](https://img.shields.io/badge/JDBC-Database_access-007396) | Connects the application to SQLite |
+| ![Log4j](https://img.shields.io/badge/Apache_Log4j_2-Logging-D22128?logo=apache&logoColor=white) | Application logging |
+| ![SLF4J](https://img.shields.io/badge/SLF4J-Logging_facade-222222) | Logging facade |
 
-```text
-Flower_Shop/
-├── .idea/                           # Конфігурація IntelliJ IDEA
-├── coverage/                        # Звіти покриття коду тестами (JaCoCo)
-├── lib/                             # Зовнішні бібліотеки
-├── out/                             # Скомпіловані класи (.class)
-├── src/                             # Вихідний код програми
-│   └── com/
-│       └── flowershop/
-│           ├── controller/
-│           │   ├── BouquetPane.java         # UI-панель керування букетами
-│           │   ├── CatalogPane.java         # UI-панель каталогу та фільтрів
-│           │   ├── FlowerShopApp.java       # Головне JavaFX-вікно
-│           │   ├── SearchPane.java          # UI-панель пошуку
-│           │   ├── Command.java             # Інтерфейс Command (для меню)
-│           │   ├── ConsoleMenu.java         # Консольний інтерфейс
-│           │   └── styles.css               # Таблиця стилів
-│           ├── dto/
-│           │   └── FlowerDto.java           # DTO-об'єкт квітки
-│           ├── model/
-│           │   ├── Accessory.java           # Модель аксесуарів
-│           │   ├── Bouquet.java             # Модель букету
-│           │   ├── Flower.java              # Абстрактний базовий клас квітки
-│           │   ├── Rose.java                # Підклас Троянди
-│           │   ├── Tulip.java               # Підклас Тюльпана
-│           │   ├── Chamomile.java           # Підклас Ромашки
-│           │   ├── Lily.java                # Підклас Лілії
-│           │   ├── Peony.java               # Підклас Півонії
-│           │   └── Orchid.java              # Підклас Орхідеї
-│           ├── repository/
-│           │   └── FlowerRepository.java    # Управління БД SQLite
-│           ├── service/
-│           │   └── FlowerShopService.java   # Координатор бізнес-логіки
-│           └── Main.java                    # Точка входу в програму
-├── test/                            # Автоматизовані тести
-├── flower_shop.db                   # Робоча база даних SQLite
-└── Flower_Shop.iml                  # Файл конфігурації модуля IDEA
+### Database
+
+| Tool | Role |
+|---|---|
+| ![SQLite](https://img.shields.io/badge/SQLite-Local_database-003B57?logo=sqlite&logoColor=white) | Stores flower, bouquet, and accessory data |
+| ![SQLite JDBC](https://img.shields.io/badge/SQLite_JDBC-Driver-003B57) | Provides SQLite connectivity through JDBC |
+
+### Testing and coverage
+
+| Tool | Role |
+|---|---|
+| ![JUnit 5](https://img.shields.io/badge/JUnit_5-Unit_tests-25A162?logo=junit5&logoColor=white) | Runs unit tests |
+| ![TestFX](https://img.shields.io/badge/TestFX-JavaFX_UI_tests-5382A1) | Supports automated JavaFX UI tests |
+| ![JaCoCo](https://img.shields.io/badge/JaCoCo-Code_coverage-D42029) | Generates code coverage reports |
+| ![Hamcrest](https://img.shields.io/badge/Hamcrest-Test_matchers-4E9A06) | Provides matchers for tests |
+
+### Development tools
+
+| Tool | Role |
+|---|---|
+| ![IntelliJ IDEA](https://img.shields.io/badge/IntelliJ_IDEA-IDE-000000?logo=intellijidea&logoColor=white) | Recommended IDE; the repository includes an IntelliJ module file |
+| ![PowerShell](https://img.shields.io/badge/PowerShell-Automation-5391FE?logo=powershell&logoColor=white) | Runs the repository’s build, test, and coverage script |
+| ![Git](https://img.shields.io/badge/Git-Version_control-F05032?logo=git&logoColor=white) | Version control |
+
+## 🚀 Run locally
+
+### Requirements
+
+- JDK 21 or newer
+- JavaFX SDK compatible with your JDK
+- Git
+- IntelliJ IDEA (recommended), or a Java IDE/terminal
+- PowerShell if you want to use the included coverage script
+
+JavaFX is not bundled with the repository. The application libraries are in `lib/`, and test libraries are in `lib/test/`.
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/vaSIUl13/Flower_Shop.git
+cd Flower_Shop
+
+### 2. Configure JavaFX
+
+The JavaFX SDK is not included in the repository. Download and extract a JavaFX SDK version compatible with your JDK from [openjfx.io](https://openjfx.io/).
+
+Set `PATH_TO_FX` to the SDK’s `lib` directory. For example:
+
+**Windows (PowerShell):**
+
+```powershell
+$env:PATH_TO_FX = "C:\path\to\javafx-sdk-21\lib"
 ```
 
----
+**Linux/macOS:**
 
-## Опис пакетів та файлів
+```bash
+export PATH_TO_FX="/path/to/javafx-sdk-21/lib"
+```
 
-### Точка входу
-*   **`src/com/flowershop/Main.java`**: Клас-запускник програми. Ініціалізує процес логування, фіксує запуск додатку та викликає системний метод `Application.launch(FlowerShopApp.class)` для передачі контролю графічному середовищу JavaFX.
+Replace the example path with the actual location of your JavaFX SDK.
 
-### Пакет `src/com/flowershop/model/` (Бізнес-моделі)
-Містить об'єктні моделі квіткового асортименту, аксесуарів та букетів із використанням принципів успадкування, інкапсуляції та поліморфізму.
+### 3. Compile and run
 
-*   **`Flower.java`**: Абстрактний суперклас для всіх квітів.
-*   **`Rose.java`**, **`Tulip.java`**, **`Chamomile.java`** та інші: Специфічні підкласи з власними полями та характеристиками.
-*   **`Accessory.java`**: Об'єкт декору для букету.
-*   **`Bouquet.java`**: Клас букету. Об'єднує списки квітів та аксесуарів. Реалізує ключові алгоритми.
+Run these commands from the repository root directory.
 
-### Пакет `src/com/flowershop/repository/` (Доступ до даних)
-*   **`FlowerRepository.java`**: Управління базою даних SQLite через JDBC. Ініціалізує БД, створює таблиці та реалізує CRUD-операції. Раніше називався `DatabaseManager`.
+**Windows (PowerShell):**
 
-### Пакет `src/com/flowershop/service/` (Бізнес-логіка)
-*   **`FlowerShopService.java`**: Сервісний шар та головний координатор. Поєднує UI з базою даних, забезпечує ініціалізацію тестового каталогу. Раніше називався `FlowerShop`.
+```powershell
+New-Item -ItemType Directory -Force -Path out | Out-Null
+$sources = Get-ChildItem -Path src -Filter "*.java" -Recurse | ForEach-Object { $_.FullName }
 
-### Пакет `src/com/flowershop/controller/` (Презентаційний шар та UI)
-Об'єднує компоненти графічного та текстового інтерфейсів користувача.
-*   **`FlowerShopApp.java`**: Головний контейнер вікна на основі `BorderPane`.
-*   **`CatalogPane.java`**, **`BouquetPane.java`**, **`SearchPane.java`**: Панелі каталогу, керування букетами та пошуку.
-*   **`styles.css`**: Таблиця CSS-стилів додатка.
-*   **`ConsoleMenu.java`** та **`Command.java`**: Реалізація текстового консольного меню програми для відлагодження через термінал на основі патерну "Команда".
+javac --release 21 --module-path "$env:PATH_TO_FX" --add-modules javafx.controls -classpath "lib/*" -d out $sources
 
-### Пакет `src/com/flowershop/dto/` (DTO)
-*   **`FlowerDto.java`**: Об'єкт передачі даних квітки. Служить для забезпечення наявності шару DTO за стандартами трирівневої архітектури.
+java --module-path "$env:PATH_TO_FX" --add-modules javafx.controls -classpath "out;lib/*" com.flowershop.Main
+```
 
----
+**Linux/macOS:**
 
-## Тестування проекту
+```bash
+mkdir -p out
+javac --release 21 --module-path "$PATH_TO_FX" --add-modules javafx.controls -classpath "lib/*" -d out $(find src -name "*.java")
 
-Система автоматизованого тестування розділена на дві категорії:
+java --module-path "$PATH_TO_FX" --add-modules javafx.controls -classpath "out:lib/*" com.flowershop.Main
+```
 
-1. **Модульні тести (`test/unit/`)**: Перевіряють бізнес-логіку методів в ізоляції.
-2. **Автоматизовані GUI-тести (`test/automation/`)**: Інтеграційні UI-тести на основі фреймворку **TestFX**.
+The application window should open after the final command. Keep the JavaFX SDK path configured when starting the application again.
