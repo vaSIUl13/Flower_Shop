@@ -13,47 +13,16 @@ A JavaFX desktop application for managing a flower shop’s catalog and creating
 - Store application data locally in SQLite—no database server required.
 - Use the JavaFX graphical interface or the additional console menu.
 
-## 🧰 Technology stack
+## 🧰 Technology Stack
 
-### Desktop UI
-
-| Tool | Role |
-|---|---|
-| ![JavaFX](https://img.shields.io/badge/JavaFX-Desktop_UI-5382A1?logo=openjdk&logoColor=white) | Builds the desktop interface and UI components |
-| ![CSS](https://img.shields.io/badge/CSS-Styles-1572B6?logo=css&logoColor=white) | Styles the JavaFX interface |
-
-### Application
-
-| Tool | Role |
-|---|---|
-| ![Java](https://img.shields.io/badge/Java-21%2B-007396?logo=openjdk&logoColor=white) | Application language |
-| ![JDBC](https://img.shields.io/badge/JDBC-Database_access-007396) | Connects the application to SQLite |
-| ![Log4j](https://img.shields.io/badge/Apache_Log4j_2-Logging-D22128?logo=apache&logoColor=white) | Application logging |
-| ![SLF4J](https://img.shields.io/badge/SLF4J-Logging_facade-222222) | Logging facade |
-
-### Database
-
-| Tool | Role |
-|---|---|
-| ![SQLite](https://img.shields.io/badge/SQLite-Local_database-003B57?logo=sqlite&logoColor=white) | Stores flower, bouquet, and accessory data |
-| ![SQLite JDBC](https://img.shields.io/badge/SQLite_JDBC-Driver-003B57) | Provides SQLite connectivity through JDBC |
-
-### Testing and coverage
-
-| Tool | Role |
-|---|---|
-| ![JUnit 5](https://img.shields.io/badge/JUnit_5-Unit_tests-25A162?logo=junit5&logoColor=white) | Runs unit tests |
-| ![TestFX](https://img.shields.io/badge/TestFX-JavaFX_UI_tests-5382A1) | Supports automated JavaFX UI tests |
-| ![JaCoCo](https://img.shields.io/badge/JaCoCo-Code_coverage-D42029) | Generates code coverage reports |
-| ![Hamcrest](https://img.shields.io/badge/Hamcrest-Test_matchers-4E9A06) | Provides matchers for tests |
-
-### Development tools
-
-| Tool | Role |
-|---|---|
-| ![IntelliJ IDEA](https://img.shields.io/badge/IntelliJ_IDEA-IDE-000000?logo=intellijidea&logoColor=white) | Recommended IDE; the repository includes an IntelliJ module file |
-| ![PowerShell](https://img.shields.io/badge/PowerShell-Automation-5391FE?logo=powershell&logoColor=white) | Runs the repository’s build, test, and coverage script |
-| ![Git](https://img.shields.io/badge/Git-Version_control-F05032?logo=git&logoColor=white) | Version control |
+| Area | Technologies |
+|:---|:---|
+| **Desktop UI** | ![JavaFX](https://img.shields.io/badge/JavaFX-5382A1?logo=openjdk&logoColor=white) ![CSS](https://img.shields.io/badge/CSS-1572B6?logo=css&logoColor=white) |
+| **Application** | ![Java](https://img.shields.io/badge/Java_21+-007396?logo=openjdk&logoColor=white) ![JDBC](https://img.shields.io/badge/JDBC-007396?logo=openjdk&logoColor=white) |
+| **Database** | ![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white) ![SQLite JDBC](https://img.shields.io/badge/SQLite_JDBC-003B57) |
+| **Logging** | ![Log4j](https://img.shields.io/badge/Apache_Log4j_2-D22128?logo=apache&logoColor=white) ![SLF4J](https://img.shields.io/badge/SLF4J-222222) |
+| **Testing** | ![JUnit 5](https://img.shields.io/badge/JUnit_5-25A162?logo=junit5&logoColor=white) ![TestFX](https://img.shields.io/badge/TestFX-5382A1) ![JaCo
+
 
 ## 🚀 Run locally
 
