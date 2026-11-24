@@ -21,8 +21,7 @@ A JavaFX desktop application for managing a flower shop’s catalog and creating
 | **Application** | ![Java](https://img.shields.io/badge/Java_21+-007396?logo=openjdk&logoColor=white) ![JDBC](https://img.shields.io/badge/JDBC-007396?logo=openjdk&logoColor=white) |
 | **Database** | ![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white) ![SQLite JDBC](https://img.shields.io/badge/SQLite_JDBC-003B57) |
 | **Logging** | ![Log4j](https://img.shields.io/badge/Apache_Log4j_2-D22128?logo=apache&logoColor=white) ![SLF4J](https://img.shields.io/badge/SLF4J-222222) |
-| **Testing** | ![JUnit 5](https://img.shields.io/badge/JUnit_5-25A162?logo=junit5&logoColor=white) ![TestFX](https://img.shields.io/badge/TestFX-5382A1) ![JaCo
-
+| **Testing** | ![JUnit 5](https://img.shields.io/badge/JUnit_5-25A162?logo=junit5&logoColor=white) ![TestFX](https://img.shields.io/badge/TestFX-5382A1) ![JaCoCo]
 
 ## 🚀 Run locally
 
